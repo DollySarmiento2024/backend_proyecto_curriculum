@@ -23,7 +23,7 @@ final class UsuarioController extends AbstractController
     #[Route(name: 'api_usuario',  methods: ['GET'])]
     public function index(UsuarioRepository $usuarioRep): JsonResponse
     {
-        $usuarios = $usuarioRep->findAll();
+        $usuarios = $this->usuarioRepository->findAll();
         $data = [];
         foreach ($usuarios as $usuario) {
             $data[] = [
@@ -33,6 +33,7 @@ final class UsuarioController extends AbstractController
                 'email' => $usuario->getEmail(),
                 'telefono' => $usuario->getTelefono(),
                 'direccion' => $usuario->getDireccion(),
+                'ciudad'=> $usuario->getCiudad(),
                 'redes_sociales' => $usuario->getRedesSociales(),
                 'foto' => $usuario->getFoto(),
                 'resumen_perfil' => $usuario->getResumenPerfil(),
@@ -42,7 +43,7 @@ final class UsuarioController extends AbstractController
     }
 
     //crear nuevo usuario
-    #[Route('/new', name: 'api_usuario_new', methods: ['POST'])]
+    #[Route(name: 'api_usuario_new', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent());
@@ -51,16 +52,20 @@ final class UsuarioController extends AbstractController
         if (!$data || !isset($data->nombre, $data->apellidos, $data->email)){
             return  new JsonResponse(['error' => 'No se pudo guardar el registro'], Response::HTTP_BAD_REQUEST);
         }
+        //obtenemos el usuario al que hace referencia
+        $usuario =  $this->usuarioRepository->find($data->id_usuario);
 
-        $this->usuarioRepository->new(
+        $new_id = $this->usuarioRepository->new(
             nombre: $data->nombre,
             apellidos: $data->apellidos ,
             email: $data->email,
             telefono: $data->telefono,
             direccion: $data->direccion,
+            ciudad: $data->ciudad,
             redes_sociales: $data->redes_sociales,
             foto: $data->foto,
-            resumen_perfil: $data->resumenPerfil);
+            resumen_perfil: $data->resumen_perfil,
+            usuario: $usuario);
 
         return new JsonResponse([
             'status' => 'Usuario registrado correctamente',
@@ -70,9 +75,11 @@ final class UsuarioController extends AbstractController
                 'email' => $data->email,
                 'telefono' => $data->telefono,
                 'direccion' => $data->direccion,
+                'ciudad' =>$data->ciudad,
                 'redes_sociales' => $data->redes_sociales,
                 'foto' => $data->foto,
-                'resumen_perfil' => $data->resumenPerfil
+                'resumen_perfil' => $data->resumenPerfil,
+                'id_usuario' => $data->id_usuario
             ]
         ], Response::HTTP_CREATED);
     }
@@ -92,10 +99,9 @@ final class UsuarioController extends AbstractController
                 'fecha_inicio' =>$formacion->getFechaInicio(),
                 'fecha_fin' =>$formacion->getFechaFin(),
                 'descripcion' =>$formacion->getDescripcion(),
-                'usuario' =>$formacion->getUsuario()->getId(),
+                'id_usuario' =>$formacion->getUsuario()->getId(),
             ];
         }
-
 
         //Experiencias del usuario
         $data_experiencias = [];
@@ -108,10 +114,9 @@ final class UsuarioController extends AbstractController
                 'fecha_inicio' => $experiencia->getFechaInicio(),
                 'fecha_fin' => $experiencia->getFechaFin(),
                 'descripcion' => $experiencia->getDescripcion(),
-                'usuario' => $experiencia->getUsuario()->getId(),
+                'id_usuario' => $experiencia->getUsuario()->getId(),
             ];
         }
-
 
         //Habilidad del usuario
         $data_habilidades = [];
@@ -122,7 +127,7 @@ final class UsuarioController extends AbstractController
              'nombre' => $habilidad->getNombre(),
              'nivel' => $habilidad->getNivel(),
              'descripcion' => $habilidad->getDescripcion(),
-              'usuario' => $habilidad->getUsuario()->getId(),
+              'id_usuario' => $habilidad->getUsuario()->getId(),
             ];
         }
 
@@ -132,9 +137,9 @@ final class UsuarioController extends AbstractController
         foreach ($idiomas as $idioma){
             $data_idioma[] = [
                 'id' => $idioma->getId(),
-                'idioma' => $idioma->getIdioma(),
+                'nombre' => $idioma->getNombre(),
                 'nivel'=> $idioma->getNivel(),
-                'usuario'=> $idioma->getUsuario()->getId(),
+                'id_usuario'=> $idioma->getUsuario()->getId(),
             ];
         }
 
@@ -147,7 +152,7 @@ final class UsuarioController extends AbstractController
                 'nombre' =>$conocimiento->getNombre(),
                 'nivel'=> $conocimiento->getNivel(),
                 'descripcion' =>$conocimiento->getDescripcion(),
-                'usuario'=> $conocimiento->getUsuario()->getId(),
+                'id_usuario'=> $conocimiento->getUsuario()->getId(),
             ];
         }
 
@@ -158,6 +163,7 @@ final class UsuarioController extends AbstractController
             'email' => $usuario->getEmail(),
             'telefono' => $usuario->getTelefono(),
             'direccion' => $usuario->getDireccion(),
+            'ciudad' => $usuario->getCiudad(),
             'redes_sociales' => $usuario->getRedesSociales(),
             'foto' => $usuario->getFoto(),
             'resumen_perfil' => $usuario->getResumenPerfil(),
@@ -171,7 +177,7 @@ final class UsuarioController extends AbstractController
     }
 
     //editar un usuario
-    #[Route('/edit/{id}', name: 'api_usuario_edit', methods: ['PUT', 'PATCH'])]
+    #[Route('/{id}', name: 'api_usuario_edit', methods: ['PUT', 'PATCH'])]
     public  function edit(int $id, Request $request): JsonResponse
     {
         $usuario = $this->usuarioRepository->find($id);
@@ -182,7 +188,7 @@ final class UsuarioController extends AbstractController
             return  new JsonResponse(['error' => 'No se pudo editar el registro'], Response::HTTP_BAD_REQUEST);
         }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'PUT')
+        if ($request->getMethod() == 'PUT')
         {
             $mensaje = 'Usuario actualizado correctamente';
         } else {
@@ -204,6 +210,9 @@ final class UsuarioController extends AbstractController
         if (!empty($data->direccion)) {
             $usuario->setDireccion($data->direccion);
         }
+        if (!empty($data->ciudad)){
+            $usuario->setCiudad($data->ciudad);
+        }
         if (!empty($data->redes_sociales)) {
             $usuario->setRedesSociales($data->redes_sociales);
         }
@@ -211,13 +220,13 @@ final class UsuarioController extends AbstractController
             $usuario->setFoto($data->foto);
         }
         if (!empty($data->resumenPerfil)) {
-            $usuario->setResumenPerfil($data->resumenPerfil);
+            $usuario->setResumenPerfil($data->resumen_perfil);
         }
         $this->usuarioRepository->save($usuario, true);
-        return new JsonResponse(['status' => $mensaje], Response::HTTP_CREATED);
+        return new JsonResponse(['status' => $mensaje], Response::HTTP_OK);
     }
 
-    #[Route('/delete/{id}', name: 'api_usuario_delete', methods: ['DELETE'])]
+    #[Route('/{id}', name: 'api_usuario_delete', methods: ['DELETE'])]
     public function  remove(Usuario $usuario): JsonResponse
     {
         $nombre = $usuario->getNombre();

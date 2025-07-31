@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Curriculum;
+use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -33,7 +34,7 @@ class CurriculumRepository extends ServiceEntityRepository
         }
     }
 
-    public function new(string $formacion, string $experiencia, string $habilidad, string $idioma, string $conocimiento, Usuario $usuario)
+    public function new(string $formacion, string $experiencia, string $habilidad, string $idioma, string $conocimiento, Usuario $usuario): int
     {
         $curriculum = new Curriculum();
         $curriculum->setFormacion($formacion);
@@ -44,9 +45,12 @@ class CurriculumRepository extends ServiceEntityRepository
         $curriculum->setUsuario($usuario);
         $this->getEntityManager()->persist($curriculum);
         $this->getEntityManager()->flush();
+
+        //devolvemos id creado
+        return $curriculum->getId();
     }
 
-
+}
 
 
 
@@ -75,4 +79,4 @@ class CurriculumRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
-}
+

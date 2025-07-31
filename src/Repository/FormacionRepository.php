@@ -32,7 +32,8 @@ class FormacionRepository extends ServiceEntityRepository
         }
     }
 
-    public function new(string $titulo, string $centro, \DateTime $fecha_inicio, \DateTime $fecha_fin, string $descripcion, Usuario $usuario): void    {
+    public function new(string $titulo, string $centro, \DateTime $fecha_inicio, \DateTime $fecha_fin, string $descripcion, Usuario $usuario): int
+    {
         $formacion = new Formacion();
         $formacion->setTitulo($titulo);
         $formacion->setCentro($centro);
@@ -42,6 +43,9 @@ class FormacionRepository extends ServiceEntityRepository
         $formacion->setUsuario($usuario);
         $this->getEntityManager()->persist($formacion);
         $this->getEntityManager()->flush();
+
+        //devolvemos id creado
+        return $formacion->getId();
     }
 }
     //    /**

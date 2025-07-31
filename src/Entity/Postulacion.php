@@ -25,6 +25,9 @@ class Postulacion
     #[ORM\Column(name:'estado', type: Types::STRING, length: 50, options: ["default" => "pendiente"])]
     private string $estado = 'pendiente';
 
+    #[ORM\Column(name: 'score', type: Types::DECIMAL, precision: 4, scale: 1)]
+    private float $score;
+
     #[ORM\ManyToOne(targetEntity:Usuario::class, inversedBy: 'postulaciones')]
     #[ORM\JoinColumn(name:'id_usuario', referencedColumnName:'id')]
     private Usuario $usuario;
@@ -66,6 +69,16 @@ class Postulacion
     public function setEstado(string $estado): void
     {
         $this->estado = $estado;
+    }
+
+    public function getScore(): float
+    {
+        return $this->score;
+    }
+
+    public function setScore(float $score): void
+    {
+        $this->score = $score;
     }
 
     public function getUsuario(): Usuario

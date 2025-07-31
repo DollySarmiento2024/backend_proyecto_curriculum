@@ -32,7 +32,7 @@ class HabilidadRepository extends ServiceEntityRepository
         }
     }
 
-    public function new(string $nombre, string $nivel, string $descripcion, Usuario $usuario): void
+    public function new(string $nombre, string $nivel, string $descripcion, Usuario $usuario): int
     {
         $habilidad = new Habilidad();
         $habilidad->setNombre($nombre);
@@ -41,6 +41,9 @@ class HabilidadRepository extends ServiceEntityRepository
         $habilidad->setUsuario($usuario);
         $this->getEntityManager()->persist($habilidad);
         $this->getEntityManager()->flush();
+
+        //devolvemos id creado
+        return $habilidad->getId();
     }
 }
 

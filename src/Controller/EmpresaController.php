@@ -24,7 +24,7 @@ final class EmpresaController extends AbstractController
     #[Route(name: 'api_empresa', methods: ['GET'])]
     public function index(EmpresaRepository $empresaRep): JsonResponse
     {
-        $empresas = $empresaRep->findAll();
+        $empresas = $this->empresaRepository->findAll();
         $data = [];
         foreach ($empresas as $empresa) {
             $data[] = [
@@ -34,18 +34,18 @@ final class EmpresaController extends AbstractController
                 'telefono' => $empresa->getTelefono(),
                 'direccion' => $empresa->getDireccion(),
                 'ciudad' => $empresa->getCiudad(),
-                'pais' => $empresa->getPais(),
                 'sector' => $empresa->getSector(),
                 'descripcion' => $empresa->getDescripcion(),
                 'logo' => $empresa->getLogo(),
                 'sitio_web' => $empresa->getSitioWeb(),
+                'redes_sociales' => $empresa->getRedesSociales()
             ];
         }
         return new JsonResponse(['empresas' => $data], Response::HTTP_OK );
     }
 
     //crear nueva empresa
-    #[Route('/new', name: 'api_empresa_new', methods: ['POST'])]
+    #[Route(name: 'api_empresa_new', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
         $data = Json_decode($request->getContent(), true);
@@ -54,31 +54,33 @@ final class EmpresaController extends AbstractController
         if (!$data || !isset($data->nombre, $data->email)) {
             return new JsonResponse(['error' => 'No se pudo guardar el registro'], Response::HTTP_BAD_REQUEST);
         }
-        $this->empresaRepository->new(
+
+        $new_id = $this->empresaRepository->new(
             nombre: $data->nombre,
             email: $data->email,
             telefono: $data->telefono,
             direccion: $data->direccion,
             ciudad: $data->ciudad,
-            pais: $data->pais,
             sector: $data->sector,
             descripcion: $data->descripcion,
             logo: $data->logo,
-            sitio_web: $data->sitio_web);
+            sitio_web: $data->sitio_web,
+            redes_sociales: $data->redes_sociales);
 
     return new JsonResponse([
         'status' => 'Empresa registrada correctamente',
         'empresa' => [
+            'id' => $new_id,
             'nombre' => $data->nombre,
             'email' => $data->email,
             'telefono' => $data->telefono,
             'direccion' => $data->direccion,
             'ciudad' => $data->ciudad,
-            'pais' => $data->pais,
             'sector' => $data->sector,
             'descripcion' => $data->descripcion,
             'logo' => $data->logo,
             'sitio_web' => $data->sitio_web,
+            'redes_sociales' => $data->redes_sociales,
         ]
     ], Response::HTTP_CREATED);
   }
@@ -94,22 +96,29 @@ final class EmpresaController extends AbstractController
            'telefono' => $empresa->getTelefono(),
            'direccion' => $empresa->getDireccion(),
            'ciudad' => $empresa->getCiudad(),
-           'pais' => $empresa->getPais(),
            'sector' => $empresa->getSector(),
            'descripcion' => $empresa->getDescripcion(),
            'logo' => $empresa->getLogo(),
            'sitio_web' => $empresa->getSitioWeb(),
+            'redes_sociales' => $empresa->getRedesSociales()
         ];
         return new JsonResponse($data, Response::HTTP_OK);
     }
 
     //Editar una empresa
-    #[Route('/edit/{id}', name: 'api_empresa_edit', methods: ['PUT', 'PATCH'])]
+    #[Route('/{id}', name: 'api_empresa_edit', methods: ['PUT', 'PATCH'])]
     public function edit(int $id, Request $request): JsonResponse
     {
         $empresa = $this->empresaRepository->find($id);
         $data = Json_decode($request->getContent());
-         if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+
+        //si datos vacios, devolver mensaje de error
+        if(!$data){
+            return new JsonResponse(['error' => 'No se pudo editar el registro'], Response::HTTP_BAD_REQUEST);
+        }
+
+         if ($request->getMethod() === 'PUT')
+         {
              $mensaje = 'Empresa actualizada correctamente';
          } else {
              $mensaje = 'Empresa actualizada parcialmente';
@@ -129,10 +138,7 @@ final class EmpresaController extends AbstractController
          if(!empty($data->ciudad)){
              $empresa->setCiudad($data->ciudad);
          }
-         if (!empty($data->pais)) {
-             $empresa->setPais($data->pais);
-         }
-         if (!empty($data->sector)) {
+          if (!empty($data->sector)) {
              $empresa->setSector($data->sector);
          }
          if (!empty($data->descripcion)) {
@@ -144,16 +150,19 @@ final class EmpresaController extends AbstractController
          if (!empty($data->sitio_web)) {
              $empresa->setSitioWeb($data->sitio_web);
          }
+         if (!empty($data->redes_sociales)){
+             $empresa->setRedesSociales($data->redes_sociales);
+         }
          $this->empresaRepository->save($empresa, true);
-         return new JsonResponse(['status' => $mensaje], Response::HTTP_CREATED);
+         return new JsonResponse(['status' => $mensaje], Response::HTTP_OK);
     }
 
-    #[Route('/delete/{id}', name: 'api_empresa_delete', methods: ['DELETE'])]
+    #[Route('/{id}', name: 'api_empresa_delete', methods: ['DELETE'])]
     public function remove(Empresa $empresa):jsonResponse
     {
         $nombre = $empresa->getNombre();
         $this->empresaRepository->remove($empresa, true);
-        return new JsonResponse(['status' => 'empresa' . $nombre . 'Empresa eliminada correctamente'], Response::HTTP_OK);
+        return new JsonResponse(['status' => 'empresa ' . $nombre . ' eliminada correctamente'], Response::HTTP_OK);
     }
 }
 

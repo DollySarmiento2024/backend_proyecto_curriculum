@@ -12,7 +12,7 @@ class Curriculum
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'id', type:Types::TEXT)]
+    #[ORM\Column(name: 'id', type:Types::INTEGER)]
     private int $id;
 
     #[ORM\Column(name: 'formacion', type: Types::TEXT)]

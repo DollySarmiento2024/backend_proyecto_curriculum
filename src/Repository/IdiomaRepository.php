@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Idioma;
+use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -32,14 +33,17 @@ class IdiomaRepository extends ServiceEntityRepository
         }
     }
 
-    public function new(string $idioma, string $nivel, Usuario $usuario): void
+    public function new(string $nombre, string $nivel, Usuario $usuario): int
     {
         $idioma = new Idioma();
-        $idioma->setIdioma($idioma);
+        $idioma->setNombre($nombre);
         $idioma->setNivel($nivel);
         $idioma->setUsuario($usuario);
         $this->getEntityManager()->persist($idioma);
         $this->getEntityManager()->flush();
+
+        //devolvemos id creado
+        return $idioma->getId();
     }
 }
 

@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Recomendacion;
+use App\Repository\OfertaEmpleoRepository;
 use App\Repository\RecomendacionRepository;
+use App\Repository\UsuarioRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,32 +16,36 @@ use Symfony\Component\Routing\Attribute\Route;
 final class RecomendacionController extends AbstractController
 {
     private RecomendacionRepository $recomendacionRepository;
+    private UsuarioRepository $usuarioRepository;
+    private OfertaEmpleoRepository $ofertaEmpleoRepository;
 
-    public function __construct(RecomendacionRepository $recomendacionRepo)
+    public function __construct(RecomendacionRepository $recomendacionRep, UsuarioRepository $usuarioRep, OfertaEmpleoRepository $ofertaEmpleoRep)
     {
-        $this->recomendacionRepository = $recomendacionRepo;
+        $this->recomendacionRepository = $recomendacionRep;
+        $this->usuarioRepository = $usuarioRep;
+        $this->ofertaEmpleoRepository = $ofertaEmpleoRep;
     }
 
     //listar las recomendaciones
     #[Route(name: 'app_recomendacion', methods: ['GET'])]
-    public function index(RecomendacionRepository $recomendacionRepo): JsonResponse
+    public function index(RecomendacionRepository $recomendacionRep): JsonResponse
     {
-        $recomendaciones = $recomendacionRepo->findAll();
+        $recomendaciones = $this->recomendacionRepository->findAll();
         $data = [];
         foreach ($recomendaciones as $recomendacion) {
             $data[] = [
                 'id' => $recomendacion->getId(),
                 'score' => $recomendacion->getScore(),
                 'fecha' => $recomendacion->getFecha(),
-                'usuario' => $recomendacion->getUsuario()->getNombre(),
-                'oferta' => $recomendacion->getOferta()->getId(),
+                'id_usuario' => $recomendacion->getUsuario()->getId(),
+                'id_oferta_empleo' => $recomendacion->getOfertaEmpleo()->getId(),
             ];
         }
         return new JsonResponse(['recomendaciones' => $data], Response::HTTP_OK);
     }
 
     //crear nueva recomendacion
-    #[Route('new', name: 'app_recomencion_new', methods: ['POST'])]
+    #[Route(name: 'app_recomencion_new', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent());
@@ -49,15 +55,23 @@ final class RecomendacionController extends AbstractController
             return new JsonResponse(['error' => 'No se pudo guardar el registro'], Response::HTTP_BAD_REQUEST);
         }
 
-        $this->recomendacionRepository->new(
+        //Obtenemos el curriculum al que hace referencia
+        $usuario = $this->usuarioRepository->find($data->id_usuario);
+        $oferta_empleo = $this->ofertaEmpleoRepository->find($data->id_oferta_empleo);
+
+         $new_id = $this->recomendacionRepository->new(
             score: $data->score,
-            fecha: $data->fecha);
+            fecha: $data->fecha,
+            usuario: $usuario,
+            oferta_empleo: $oferta_empleo);
 
         return new JsonResponse([
             'status' => 'Usuario registrado correctamente',
             'curriculum' => [
                 'score' => $data->score,
                 'fecha' => $data->fecha,
+                'id_usuario' => $data->id_usuario,
+                'id_oferta_empleo' => $data->id_oferta_empleo,
             ]
         ], Response::HTTP_CREATED);
     }
@@ -67,16 +81,17 @@ final class RecomendacionController extends AbstractController
     public function show(Recomendacion $recomendacion): JsonResponse
     {
         //usuario
-        $data_usuarios = [];
+        $data_usuario = [];
         $usuarios = $recomendacion->getUsuario();
         foreach ($usuarios as $usuario) {
-            $data_usuarios[] = [
+            $data_usuario[] = [
                 'id' => $usuario->getId(),
                 'nombre' => $usuario->getNombre(),
                 'apellidos' => $usuario->getCentro(),
                 'email' => $usuario->getFechaInicio(),
                 'telefono' => $usuario->getFechaFin(),
                 'direccion' => $usuario->getDescripcion(),
+                'ciudad' => $usuario->getCiudad(),
                 'redes_sociales' => $usuario->setRedesSociales(),
                 'foto' => $usuario->getFoto(),
                 'resumen_perfil' => $usuario->getResumenPerfil(),
@@ -85,16 +100,17 @@ final class RecomendacionController extends AbstractController
 
         //oferta empleo
         $data_oferta_empleo = [];
-        $oferta_empleos = $recomendacion->getOferta();
-        foreach ($oferta_empleos as $ofertaEmpleo) {
-            $data_usuarios[] = [
-                'id' => $ofertaEmpleo->getId(),
-                'titulo' => $ofertaEmpleo->getTitulo(),
-                'descripcion' => $ofertaEmpleo->getDescripcion(),
-                'ubicacion' => $ofertaEmpleo->getUbicacion(),
-                'tipo_contrato' => $ofertaEmpleo->getTipoContrato(),
-                'salario' => $ofertaEmpleo->getSalario(),
-                'fecha_publicacion' => $ofertaEmpleo->getFechaPublicacion(),
+        $oferta_empleos = $recomendacion->getOfertaEmpleo();
+        foreach ($oferta_empleos as $oferta_empleo) {
+            $data_oferta_empleo = [
+                'id' => $oferta_empleo->getId(),
+                'titulo' => $oferta_empleo->getTitulo(),
+                'descripcion' => $oferta_empleo->getDescripcion(),
+                'ubicacion' => $oferta_empleo->getUbicacion(),
+                'tipo_contrato' => $oferta_empleo->getTipoContrato(),
+                'salario' => $oferta_empleo->getSalario(),
+                'fecha_publicacion' => $oferta_empleo->getFechaPublicacion(),
+                'id_empresa' =>$oferta_empleo->getEmpresa()->getId(),
             ];
         }
 
@@ -102,15 +118,15 @@ final class RecomendacionController extends AbstractController
             'id' => $recomendacion->getId(),
             'score' => $recomendacion->getScore(),
             'fecha' => $recomendacion->getFecha(),
-            'usuario' => [$data_usuarios],
-            'oferta' => [$data_oferta_empleo]
+            'usuario' => [$data_usuario],
+            'oferta_empleo' => [$data_oferta_empleo]
         ];
         return new JsonResponse ($data, Response::HTTP_OK);
     }
 
 
-        //editar un usuario
-    #[Route('/edit/{id}', name: 'api_recomendacion_edit', methods: ['PUT', 'PATCH'])]
+    //editar un usuario
+    #[Route('/{id}', name: 'api_recomendacion_edit', methods: ['PUT', 'PATCH'])]
     public  function edit(int $id, Request $request): JsonResponse
     {
         $recomendacion = $this->recomendacionRepository->find($id);
@@ -121,7 +137,7 @@ final class RecomendacionController extends AbstractController
             return new JsonResponse(['error' => 'No se pudo editar el registro'], Response::HTTP_BAD_REQUEST);
         }
 
-       if ($_SERVER['REQUEST_METHOD'] == 'PUT')
+       if ($request->getMethod() == 'PUT')
        {
            $mensaje = 'Recomendacion actualizada correctamente';
        } else {
@@ -133,16 +149,22 @@ final class RecomendacionController extends AbstractController
        if (!empty($data->fecha)){
             $recomendacion->setFecha($data->fecha);
        }
+       if (!empty($data->usuario_id)){
+           $recomendacion->setUsuario($data->usuario);
+       }
+       if (!empty($data->oferta_id)){
+           $recomendacion->setOfertaEmpleo($data->oferta);
+       }
        $this->recomendacionRepository->save($recomendacion, true);
-       return new JsonResponse(['status' => $mensaje], Response::HTTP_CREATED);
+       return new JsonResponse(['status' => $mensaje], Response::HTTP_OK);
     }
 
-    #[Route('/delete/{id}', name: 'api_recomendacion_delete', methods: ['DELETE'])]
+    #[Route('/{id}', name: 'api_recomendacion_delete', methods: ['DELETE'])]
     public function remove(Recomendacion $recomendacion): JsonResponse
     {
         $score = $recomendacion->getScore();
-        $this->recomendacionRepository->remove($recomendacion, true);
-        return new JsonResponse(['status' => $recomendacion . '$score' . 'Usuario eliminado correctamente'], Response::HTTP_OK);
+        $this->recomendacionRepository->remove($recomendacion, flush: true);
+        return new JsonResponse(['status' => 'recomendacion ' . $score . ' eliminada correctamente'], Response::HTTP_OK);
     }
 }
 

@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Repository;
-
 use App\Entity\Conocimiento;
 use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -33,7 +32,7 @@ class ConocimientoRepository extends ServiceEntityRepository
         }
     }
 
-    public function new(string $nombre, string $nivel, string $descripcion, Usuario $usuario): void
+    public function new(string $nombre, string $nivel, string $descripcion, Usuario $usuario): int
     {
         $conocimiento = new Conocimiento();
         $conocimiento->setNombre($nombre);
@@ -42,9 +41,10 @@ class ConocimientoRepository extends ServiceEntityRepository
         $conocimiento->setUsuario($usuario);
         $this->getEntityManager()->persist($conocimiento);
         $this->getEntityManager()->flush();
+
+        //devolvemos id creado
+        return $conocimiento->getId();
     }
-
-
 }
     //    /**
     //     * @return Conocimiento[] Returns an array of Conocimiento objects

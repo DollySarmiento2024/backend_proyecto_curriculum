@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Curriculum;
+use App\Entity\OfertaEmpleo;
 use App\Entity\Recomendacion;
+use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -17,7 +19,7 @@ class RecomendacionRepository extends ServiceEntityRepository
         parent::__construct($registry, Recomendacion::class);
     }
 
-    public function save(curriculum $entity, bool $flush = false): void{
+    public function save(recomendacion $entity, bool $flush = false): void{
 
         $this->getEntityManager()->persist($entity);
         if ($flush) {
@@ -26,22 +28,26 @@ class RecomendacionRepository extends ServiceEntityRepository
     }
 
 
-    public function remove(Curriculum $curriculum, bool $flush = false): void
+    public function remove(Recomendacion $recomendacion, bool $flush = false): void
     {
-        $this->getEntityManager()->remove($curriculum);
+        $this->getEntityManager()->remove($recomendacion);
         if ($flush) {
             $this->getEntityManager()->flush();
         }
     }
 
-    public function new(string $score, string $fecha): void
+    public function new(string $score, \DateTime $fecha, Usuario $usuario, OfertaEmpleo $oferta_empleo): int
     {
-        $recomendacion = new Curriculum();
+        $recomendacion = new Recomendacion();
         $recomendacion ->setScore($score);
         $recomendacion->setFecha($fecha);
+        $recomendacion->setUsuario($usuario);
+        $recomendacion->setOfertaEmpleo($oferta_empleo);
         $this->getEntityManager()->persist($recomendacion);
         $this->getEntityManager()->flush();
 
+        //devolvemos id creado
+        return $recomendacion->getId();
     }
 }
 

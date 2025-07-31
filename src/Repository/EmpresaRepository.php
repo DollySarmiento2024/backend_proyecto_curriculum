@@ -31,7 +31,7 @@ class EmpresaRepository extends ServiceEntityRepository
         }
     }
 
-    public function new(string $nombre, string $email, string $telefono, string $direccion, string $ciudad, string $pais, string $sector, string $descripcion, string $logo, string $sitio_web)
+    public function new(string $nombre, string $email, string $telefono, string $direccion, string $ciudad, string $sector, string $descripcion, string $logo, string $sitio_web, string $redes_sociales): int
     {
         $empresa = new Empresa();
         $empresa->setNombre($nombre);
@@ -39,16 +39,17 @@ class EmpresaRepository extends ServiceEntityRepository
         $empresa->setTelefono($telefono);
         $empresa->setDireccion($direccion);
         $empresa->setCiudad($ciudad);
-        $empresa->setPais($pais);
         $empresa->setSector($sector);
         $empresa->setDescripcion($descripcion);
         $empresa->setLogo($logo);
         $empresa->setSitioWeb($sitio_web);
+        $empresa->setRedesSociales($redes_sociales);
         $this->getEntityManager()->persist($empresa);
         $this->getEntityManager()->flush();
+
+        //devolvemos id creado
+        return $empresa->getId();
     }
-
-
 
     //    /**
     //     * @return Empresa[] Returns an array of Empresa objects

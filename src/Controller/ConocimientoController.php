@@ -10,22 +10,24 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/conocimiento', name: 'api_conocimiento', methods: ['GET'])]
+#[Route('/conocimiento')]
 final class ConocimientoController extends AbstractController
 {
    private ConocimientoRepository $conocimientoRepository;
    private UsuarioRepository $usuarioRepository;
 
-   public function __construct(ConocimientoRepository $conocimientoRep)
+   public function __construct(ConocimientoRepository $conocimientoRep, UsuarioRepository $usuarioRep)
    {
        $this->conocimientoRepository = $conocimientoRep;
+       $this->usuarioRepository = $usuarioRep;
    }
 
     //Listar conocimiento de un usuario
-    #[Route('/usuario/{id}', name: 'api_usuario_usuario', methods: ['GET'])]
-    public function indexByUser(int $id, ConocimientoRepository $conocimientoRep): JsonResponse
+    #[Route('/usuario/{id}', name: 'api_conocimiento_usuario', methods: ['GET'])]
+    public function indexByUser(int $id): JsonResponse
     {
-        $conocimientos = $conocimientoRep->findBy(['usuario' => $id]);
+        $usuario = $this->usuarioRepository->find($id);
+        $conocimientos = $this->conocimientoRepository->findBy(['usuario' => $usuario]);
         $data = [];
         foreach ($conocimientos as $conocimiento) {
             $data[] = [
@@ -33,14 +35,14 @@ final class ConocimientoController extends AbstractController
                 'nombre' => $conocimiento->getNombre(),
                 'nivel' =>$conocimiento->getNivel(),
                 'descripcion' =>$conocimiento->getDescripcion(),
-                'usuario' =>$conocimiento->getUsuario()->getId(),
+                'id_usuario' =>$conocimiento->getUsuario()->getId(),
             ];
         }
         return new JsonResponse(['conocimientos' => $data], Response::HTTP_OK);
     }
 
     //crear nuevo conocimiento
-    #[Route('/new', name: 'api_conocimiento_new', methods: ['POST'])]
+    #[Route(name: 'api_conocimiento_new', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
         $data = Json_decode($request->getContent(), true);
@@ -51,9 +53,9 @@ final class ConocimientoController extends AbstractController
         }
 
         //obtenemos el usuario al que hace referencia
-        $usuario =  $this->usuarioRepository->findOneBy(['id' => $data->id_usuario]);
+        $usuario =  $this->usuarioRepository->find($data->id_usuario);
 
-        $this->conocimientoRepository->new(
+        $new_id = $this->conocimientoRepository->new(
             nombre: $data->nombre,
             nivel: $data->nivel,
             descripcion: $data->descripcion,
@@ -62,10 +64,11 @@ final class ConocimientoController extends AbstractController
         return new JsonResponse([
             'status' => 'Conocimiento creado correctamente',
             'conocimiento' => [
+                'id' => $new_id,
                 'nombre' => $data->nombre,
                 'nivel' => $data->nivel,
                 'descripcion' => $data->descripcion,
-                'usuario' => $data->usuario_id
+                'id_usuario' => $data->id_usuario
             ]
         ], Response::HTTP_CREATED);
 
@@ -80,18 +83,24 @@ final class ConocimientoController extends AbstractController
             'nombre' => $conocimiento->getNombre(),
             'nivel' => $conocimiento->getNivel(),
             'descripcion' => $conocimiento->getDescripcion(),
-            'usuario' => $conocimiento->getUsuario()->getId(),
+            'id_usuario' => $conocimiento->getUsuario()->getId(),
         ];
         return new JsonResponse($data, Response::HTTP_OK);
     }
 
     //Editar un conocimiento
-    #[Route('/edit/{id}', name: 'api_conocimiento_edit', methods: ['PUT', 'PATCH'])]
+    #[Route('/{id}', name: 'api_conocimiento_edit', methods: ['PUT', 'PATCH'])]
     public function edit(int $id, Request $request): JsonResponse
     {
         $conocimiento = $this->conocimientoRepository->find($id);
         $data = Json_decode($request->getContent());
-        if ($_SERVER['REQUEST_METHOD'] == 'PUT')
+
+        //si datos vacios, devolver mensaje de error
+        if(!$data){
+            return new JsonResponse(['error' => 'No se pudo editar el registro'], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($request->getMethod() == 'PUT')
         {
             $mensaje = 'Conocimiento actualizado satisfactoriamente';
         } else {
@@ -106,19 +115,16 @@ final class ConocimientoController extends AbstractController
         if(!empty($data->descripcion)) {
             $conocimiento->setDescripcion($data->descripcion);
         }
-        if(!empty($data->usuario_id)) {
-            $conocimiento->setUsuario($data->usuario);
-        }
         $this->conocimientoRepository->save($conocimiento, true);
-        return new JsonResponse(['status' => $mensaje], Response::HTTP_CREATED);
+        return new JsonResponse(['status' => $mensaje], Response::HTTP_OK);
     }
 
-    #[Route('/delete/{id}', name: 'api_conocimiento_delete', methods: ['DELETE'])]
-    public function remove(conocimiento $conocimiento): JsonResponse
+    #[Route('/{id}', name: 'api_conocimiento_delete', methods: ['DELETE'])]
+    public function remove(Conocimiento $conocimiento): JsonResponse
     {
         $nombre = $conocimiento->getNombre();
         $this->conocimientoRepository->remove($conocimiento, true);
-        return new JsonResponse(['status' => 'conocimiento' . $nombre . 'Conocimiento eliminado satisfactoriamente'], Response::HTTP_OK);
+        return new JsonResponse(['status' => 'conocimiento ' . $nombre . ' eliminado satisfactoriamente'], Response::HTTP_OK);
     }
 }
 

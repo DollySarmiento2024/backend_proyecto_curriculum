@@ -33,7 +33,7 @@ class OfertaEmpleoRepository extends ServiceEntityRepository
         }
     }
 
-    public function new(string $titulo, string $descripcion, string $ubicacion, string $tipo_contrato, string $salario, \DateTimeImmutable $fecha_publicacion, Empresa $empresa): void
+    public function new(string $titulo, string $descripcion, string $ubicacion, string $tipo_contrato, string $salario, \DateTimeImmutable $fecha_publicacion, Empresa $empresa): int
     {
         $ofertaEmpleo = new OfertaEmpleo();
         $ofertaEmpleo->setTitulo($titulo);
@@ -45,6 +45,9 @@ class OfertaEmpleoRepository extends ServiceEntityRepository
         $ofertaEmpleo->setEmpresa($empresa);
         $this->getEntityManager()->persist($ofertaEmpleo);
         $this->getEntityManager()->flush();
+
+        //devolvemos id creado
+        return $ofertaEmpleo->getId();
     }
 }
     //    /**

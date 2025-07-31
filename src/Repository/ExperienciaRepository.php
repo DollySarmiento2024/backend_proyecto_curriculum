@@ -32,7 +32,7 @@ class ExperienciaRepository extends ServiceEntityRepository
         }
     }
 
-    public function new(string $puesto, string $empresa, \DateTime $fecha_inicio, \DateTime $fecha_fin, string $descripcion, Usuario $usuario): void
+    public function new(string $puesto, string $empresa, \DateTime $fecha_inicio, \DateTime $fecha_fin, string $descripcion, Usuario $usuario): int
     {
         $experiencia = new Experiencia();
         $experiencia->setPuesto($puesto);
@@ -43,9 +43,11 @@ class ExperienciaRepository extends ServiceEntityRepository
         $experiencia->setUsuario($usuario);
         $this->getEntityManager()->persist($experiencia);
         $this->getEntityManager()->flush();
+
+        //devolvemos id creado
+        return $experiencia->getId();
     }
 }
-
     //    /**
     //     * @return Experiencia[] Returns an array of Experiencia objects
     //     */

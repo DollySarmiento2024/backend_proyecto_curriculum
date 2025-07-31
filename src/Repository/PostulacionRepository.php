@@ -35,16 +35,19 @@ class PostulacionRepository extends ServiceEntityRepository
         }
     }
 
-    public function new(\DateTimeImmutable $fecha, string $carta_presentacion, string $estado, Usuario $usuario, OfertaEmpleo $oferta ): void
+    public function new(\DateTimeImmutable $fecha, string $carta_presentacion, string $estado, Usuario $usuario, OfertaEmpleo $oferta_empleo): int
     {
         $postulacion = new Postulacion();
         $postulacion->setFecha( $fecha);
         $postulacion->setCartaPresentacion($carta_presentacion);
         $postulacion->setEstado($estado);
         $postulacion->setUsuario($usuario);
-        $postulacion->setOferta($oferta);
+        $postulacion->setOfertaEmpleo($oferta_empleo);
         $this->getEntityManager()->persist($postulacion);
         $this->getEntityManager()->flush();
+
+        //devolvemos id creado
+        return $postulacion->getId();
     }
 
 }

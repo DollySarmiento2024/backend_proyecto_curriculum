@@ -33,7 +33,7 @@ class UsuarioRepository extends ServiceEntityRepository
         }
     }
 
-    public function new(string $nombre, string $apellidos, string $email, string $telefono, string $direccion, string $redes_sociales, string $foto, string $resumen_perfil): void
+    public function new(string $nombre, string $apellidos, string $email, string $telefono, string $direccion, string $ciudad, string $redes_sociales, string $foto, string $resumen_perfil, Usuario $usuario): int
     {
         $usuario = new Usuario();
         $usuario->setNombre($nombre);
@@ -41,10 +41,14 @@ class UsuarioRepository extends ServiceEntityRepository
         $usuario->setEmail($email);
         $usuario->setTelefono($telefono);
         $usuario->setDireccion($direccion);
+        $usuario->setCiudad($ciudad);
         $usuario->setRedesSociales($redes_sociales);
         $usuario->setFoto($foto);
         $usuario->setResumenPerfil($resumen_perfil);
         $this->getEntityManager()->persist($usuario);
         $this->getEntityManager()->flush();
+
+        //devolvemos id creado
+        return $usuario->getId();
     }
 }

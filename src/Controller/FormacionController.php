@@ -3,6 +3,7 @@
 namespace App\Controller;
 use App\Entity\Formacion;
 use App\Repository\FormacionRepository;
+use App\Repository\UsuarioRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,34 +14,37 @@ use Symfony\Component\Routing\Attribute\Route;
 final class FormacionController extends AbstractController
 {
    private FormacionRepository $formacionRepository;
+   private UsuarioRepository $usuarioRepository;
 
-   public function __construct(FormacionRepository $formacionRep)
+   public function __construct(FormacionRepository $formacionRep, UsuarioRepository $usuarioRep)
    {
        $this->formacionRepository = $formacionRep;
+       $this->usuarioRepository = $usuarioRep;
    }
 
     //listar formaciones de un usuario
-    #[Route('/usuario/{id}', name: 'api_usuario_usuario', methods: ['GET'])]
-    public function indexByUser(int $id, FormacionRepository $formacionRep): JsonResponse
+    #[Route('/usuario/{id}', name: 'api_formacion_usuario', methods: ['GET'])]
+    public function indexByUser(int $id): JsonResponse
     {
-       $formaciones = $formacionRep->findBy(['usuario' => $id]);
-       $data = [];
-       foreach ($formaciones as $formacion) {
-           $data[] = [
-               'id' => $formacion->getId(),
-               'titulo' => $formacion->getTitulo(),
-               'centro' =>$formacion->getCentro(),
-               'fecha_inicio' =>$formacion->getFechaInicio(),
-               'fecha_fin' =>$formacion->getFechaFin(),
-               'descripcion' =>$formacion->getDescripcion(),
-               'usuario' =>$formacion->getUsuario()->getId(),
-           ];
-       }
-       return new JsonResponse(['formaciones' => $data], Response::HTTP_OK );
+        $usuario = $this->usuarioRepository->find($id);
+        $formaciones = $this->formacionRepository->findBy(['usuario' => $usuario]);
+        $data = [];
+        foreach ($formaciones as $formacion) {
+            $data[] = [
+                'id' => $formacion->getId(),
+                'titulo' => $formacion->getTitulo(),
+                'centro' =>$formacion->getCentro(),
+                'fecha_inicio' =>$formacion->getFechaInicio(),
+                'fecha_fin' =>$formacion->getFechaFin(),
+                'descripcion' =>$formacion->getDescripcion(),
+                'id_usuario' =>$formacion->getUsuario()->getId(),
+            ];
+        }
+        return new JsonResponse(['formaciones' => $data], Response::HTTP_OK );
     }
 
-   //crear nueva formacion
-    #[Route('/new', name: 'api_formacion_new', methods: ['POST'])]
+    //crear nueva formacion
+    #[Route(name: 'api_formacion_new', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -49,26 +53,30 @@ final class FormacionController extends AbstractController
         if(!$data || !isset($data->titulo, $data->centro)){
             return new JsonResponse(['error' => 'No se pudo crear la formación'], Response::HTTP_BAD_REQUEST);
         }
-        $this->formacionRepository->new(
+
+        //Obtenemos el usuario al que hace referencia
+        $usuario = $this->usuarioRepository->find($data->id_usuario);
+
+        $new_id = $this->formacionRepository->new(
             titulo: $data->titulo,
             centro: $data->centro,
             fecha_inicio: $data->fecha_inicio,
             fecha_fin: $data->fecha_fin,
             descripcion: $data->descripcion,
-            usuario: $data->usuario_id);
+            usuario: $usuario);
 
         return new JsonResponse([
             'status' => 'Formación creada correctamente',
             'formacion' => [
+                'id' => $new_id,
                 'titulo' => $data->titulo,
                 'centro' => $data->centro,
                 'fecha_inicio' => $data->fecha_inicio,
                 'fecha_fin' => $data->fecha_fin,
                 'descripcion' => $data->descripcion,
-                'usuario' => $data->usuario_id,
+                'id_usuario' => $data->id_usuario,
             ]
         ], Response::HTTP_CREATED);
-
     }
 
     //Mostrar datos de una formación
@@ -82,18 +90,19 @@ final class FormacionController extends AbstractController
             'fecha_inicio' => $formacion->getFechaInicio(),
             'fecha_fin' => $formacion->getFechaFin(),
             'descripcion' => $formacion->getDescripcion(),
-            'usuario' => $formacion->getUsuario()->getId(),
+            'id_usuario' => $formacion->getUsuario()->getId(),
         ];
         return new JsonResponse($data, Response::HTTP_OK);
     }
 
     //Editar una formacion
-    #[Route('/edit/{id}', name: 'api_formacion_edit', methods: ['PUT', 'PATCH'])]
+    #[Route('/{id}', name: 'api_formacion_edit', methods: ['PUT', 'PATCH'])]
     public function edit(int $id, Request $request): JsonResponse
     {
         $formacion = $this->formacionRepository->find($id);
         $data = Json_decode($request->getContent());
-        if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
+        if ($request->getMethod() == 'PUT')
+        {
             $mensaje = 'Formación actualizada satisfactoriamente';
         } else {
             $mensaje = 'Formación actualizada parcialmente';
@@ -113,14 +122,11 @@ final class FormacionController extends AbstractController
         if (!empty($data->descripcion)) {
             $formacion->setDescripcion($data->descripcion);
         }
-        if (!empty($data->usuario_id)) {
-            $formacion->setUsuario($data->usuario);
-        }
         $this->formacionRepository->save($formacion, true);
-        return new JsonResponse(['status' => $mensaje], Response::HTTP_CREATED);
+        return new JsonResponse(['status' => $mensaje], Response::HTTP_OK);
     }
 
-    #[Route('/delete/{id}', name: 'api_formacion_delete', methods: ['DELETE'])]
+    #[Route('/{id}', name: 'api_formacion_delete', methods: ['DELETE'])]
     public function remove(Formacion $formacion): JsonResponse
     {
         $titulo = $formacion->getTitulo();

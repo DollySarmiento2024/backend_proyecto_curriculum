@@ -63,5 +63,4 @@ class Idioma
         $this->usuario = $usuario;
     }
 
-
 }
