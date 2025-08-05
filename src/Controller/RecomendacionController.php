@@ -6,6 +6,7 @@ use App\Entity\Recomendacion;
 use App\Repository\OfertaEmpleoRepository;
 use App\Repository\RecomendacionRepository;
 use App\Repository\UsuarioRepository;
+use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -61,7 +62,7 @@ final class RecomendacionController extends AbstractController
 
          $new_id = $this->recomendacionRepository->new(
             score: $data->score,
-            fecha: $data->fecha,
+            fecha: new DateTime($data->fecha),
             usuario: $usuario,
             oferta_empleo: $oferta_empleo);
 

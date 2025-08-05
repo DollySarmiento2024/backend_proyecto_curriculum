@@ -45,7 +45,7 @@ final class HabilidadController extends AbstractController
     #[Route(name: 'api_habilidad_new', methods: ['POST'])]
     public function add(Request $request):JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent());
 
         //si datos vacios o no están los obligatorios, devolver mensaje de error
         if (!$data || !isset($data->nombre)) {

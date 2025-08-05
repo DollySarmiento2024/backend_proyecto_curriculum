@@ -44,7 +44,7 @@ final class IdiomaController extends AbstractController
     #[Route(name: 'api_idioma_new', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent());
 
         //si datos vacios o no están los obligatorios, devolver mensaje de error
         if(!$data || !isset($data->nombre)){
@@ -63,7 +63,6 @@ final class IdiomaController extends AbstractController
     return new JsonResponse([
          'status'=> 'Idioma registrado correctamente',
          'idioma' => [
-             'id' =>$new_id,
              'nombre'=>$data->nombre,
              'nivel'=>$data->nivel,
              'id_usuario'=>$data->id_usuario

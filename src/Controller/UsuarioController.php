@@ -52,8 +52,6 @@ final class UsuarioController extends AbstractController
         if (!$data || !isset($data->nombre, $data->apellidos, $data->email)){
             return  new JsonResponse(['error' => 'No se pudo guardar el registro'], Response::HTTP_BAD_REQUEST);
         }
-        //obtenemos el usuario al que hace referencia
-        $usuario =  $this->usuarioRepository->find($data->id_usuario);
 
         $new_id = $this->usuarioRepository->new(
             nombre: $data->nombre,
@@ -64,8 +62,7 @@ final class UsuarioController extends AbstractController
             ciudad: $data->ciudad,
             redes_sociales: $data->redes_sociales,
             foto: $data->foto,
-            resumen_perfil: $data->resumen_perfil,
-            usuario: $usuario);
+            resumen_perfil: $data->resumen_perfil);
 
         return new JsonResponse([
             'status' => 'Usuario registrado correctamente',
@@ -78,7 +75,7 @@ final class UsuarioController extends AbstractController
                 'ciudad' =>$data->ciudad,
                 'redes_sociales' => $data->redes_sociales,
                 'foto' => $data->foto,
-                'resumen_perfil' => $data->resumenPerfil,
+                'resumen_perfil' => $data->resumen_perfil,
                 'id_usuario' => $data->id_usuario
             ]
         ], Response::HTTP_CREATED);
@@ -199,7 +196,7 @@ final class UsuarioController extends AbstractController
             $usuario->setNombre($data->nombre);
         }
         if (!empty($data->apellidos)) {
-            $usuario->setApellido($data->apellidos);
+            $usuario->setApellidos($data->apellidos);
         }
         if (!empty($data->email)) {
             $usuario->setEmail($data->email);

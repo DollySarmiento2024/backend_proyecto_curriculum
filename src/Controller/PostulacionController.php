@@ -28,7 +28,7 @@ use Symfony\Component\Routing\Attribute\Route;
             $this->ofertaEmpleoRepository = $ofertaEmpleoRep;
        }
 
-        #[Route(name: 'app-postulacion')]
+        #[Route(name: 'app_postulacion')]
         public function index(PostulacionRepository $postulacionRep): JsonResponse
         {
             $postulaciones = $this->postulacionRepository->findAll();
@@ -39,6 +39,7 @@ use Symfony\Component\Routing\Attribute\Route;
                     'fecha' =>$postulacion->getFecha(),
                     'carta_presentacion' =>$postulacion->getCartaPresentacion(),
                     'estado' =>$postulacion->getEstado(),
+                    'score' =>$postulacion->getScore(),
                     'id_usuario' =>$postulacion->getUsuario()->getId(),
                     'id_oferta_empleo' =>$postulacion->getOfertaEmpleo()->getId(),
                 ];
@@ -62,9 +63,10 @@ use Symfony\Component\Routing\Attribute\Route;
 
             $fecha_actual = new \DateTimeImmutable();//date("Y-m-d H:i:s");
             $new_id = $this->postulacionRepository->new(
-                fecha: $fecha_actual,
+                fecha: new \DateTimeImmutable($data->fecha),
                 carta_presentacion: $data->carta_presentacion,
                 estado: $data->estado,
+                score: $data->score,
                 usuario: $usuario,
                 oferta_empleo: $oferta_empleo);
 

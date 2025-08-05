@@ -47,7 +47,7 @@ final class CurriculumController extends AbstractController
     #[Route(name: 'api_curriculum', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
-        $data = Json_decode($request->getContent(), true);
+        $data = Json_decode($request->getContent());
 
         //si datos vacios o no están los obligatorios, devolver mensaje de error
         if (!$data || !isset($data->formacion, $data->experiencia, $data->habilidad, $data->idioma, $data->conocimiento)) {

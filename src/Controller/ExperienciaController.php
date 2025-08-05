@@ -4,6 +4,7 @@ namespace App\Controller;
 use App\Entity\Experiencia;
 use App\Repository\ExperienciaRepository;
 use App\Repository\UsuarioRepository;
+use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,7 +28,7 @@ final class ExperienciaController extends AbstractController
     public function indexByUser(int $id): JsonResponse
     {
         $usuario = $this->usuarioRepository->find($id);
-        $experiencias = $this->experienciaRepository->finBy(['usuario' => $usuario]);
+        $experiencias = $this->experienciaRepository->findBy(['usuario' => $usuario]);
         $data = [];
         foreach ($experiencias as $experiencia) {
             $data[] = [
@@ -47,7 +48,7 @@ final class ExperienciaController extends AbstractController
     #[Route(name: 'api_experiencia_new', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent());
 
         //si datos vacios o no están los obligatorios, devolver mensaje de error
         if (!$data || !isset($data->puesto, $data->empresa)) {
@@ -60,8 +61,8 @@ final class ExperienciaController extends AbstractController
         $new_id = $this->experienciaRepository->new(
             puesto: $data->puesto,
             empresa: $data->empresa,
-            fecha_inicio: $data->fecha_inicio,
-            fecha_fin: $data->fecha_fin,
+            fecha_inicio: new DateTime($data->fecha_inicio),
+            fecha_fin: new DateTime($data->fecha_fin),
             descripcion: $data->descripcion,
             usuario: $usuario);
 
@@ -71,8 +72,8 @@ final class ExperienciaController extends AbstractController
                 'id' => $new_id,
                 'puesto' => $data->puesto,
                 'empresa' => $data->empresa,
-                'fechaInicio' => $data->fechaInicio,
-                'fechaFin' => $data->fechaFin,
+                'fecha_inicio' => $data->fecha_inicio,
+                'fecha_fin' => $data->fecha_fin,
                 'descripcion' => $data->descripcion,
                 'id_usuario' => $data->id_usuario,
             ]

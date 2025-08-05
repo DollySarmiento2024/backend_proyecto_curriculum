@@ -45,7 +45,7 @@ final class ConocimientoController extends AbstractController
     #[Route(name: 'api_conocimiento_new', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
-        $data = Json_decode($request->getContent(), true);
+        $data = Json_decode($request->getContent());
 
         //si datos vacios o no están los obligatorios, devolver mensaje de error
         if (!$data || !isset($data->nombre)) {
@@ -62,7 +62,7 @@ final class ConocimientoController extends AbstractController
             usuario: $usuario);
 
         return new JsonResponse([
-            'status' => 'Conocimiento creado correctamente',
+            'status' => 'Conocimiento registrado correctamente',
             'conocimiento' => [
                 'id' => $new_id,
                 'nombre' => $data->nombre,

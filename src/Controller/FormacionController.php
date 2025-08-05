@@ -4,6 +4,7 @@ namespace App\Controller;
 use App\Entity\Formacion;
 use App\Repository\FormacionRepository;
 use App\Repository\UsuarioRepository;
+use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,7 +48,7 @@ final class FormacionController extends AbstractController
     #[Route(name: 'api_formacion_new', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent());
 
         //si datos o no están los obligatorios, devolver mensaje de error
         if(!$data || !isset($data->titulo, $data->centro)){
@@ -60,8 +61,8 @@ final class FormacionController extends AbstractController
         $new_id = $this->formacionRepository->new(
             titulo: $data->titulo,
             centro: $data->centro,
-            fecha_inicio: $data->fecha_inicio,
-            fecha_fin: $data->fecha_fin,
+            fecha_inicio: new DateTime($data->fecha_inicio),
+            fecha_fin: new DateTime($data->fecha_fin),
             descripcion: $data->descripcion,
             usuario: $usuario);
 
@@ -100,7 +101,11 @@ final class FormacionController extends AbstractController
     public function edit(int $id, Request $request): JsonResponse
     {
         $formacion = $this->formacionRepository->find($id);
-        $data = Json_decode($request->getContent());
+        $data = json_decode($request->getContent());
+        //si datos vacios, devolver mensaje de error
+        if (!$data){
+            return  new JsonResponse(['error' => 'No se pudo editar el registro'], Response::HTTP_BAD_REQUEST);
+        }
         if ($request->getMethod() == 'PUT')
         {
             $mensaje = 'Formación actualizada satisfactoriamente';
@@ -114,10 +119,10 @@ final class FormacionController extends AbstractController
             $formacion->setCentro($data->centro);
         }
         if (!empty($data->fecha_inicio)) {
-            $formacion->setFechaInicio($data->fecha_inicio);
+            $formacion->setFechaInicio(new DateTime($data->fecha_inicio));
         }
         if (!empty($data->fecha_fin)) {
-            $formacion->setFechaFin($data->fecha_fin);
+            $formacion->setFechaFin(new DateTime($data->fecha_fin));
         }
         if (!empty($data->descripcion)) {
             $formacion->setDescripcion($data->descripcion);

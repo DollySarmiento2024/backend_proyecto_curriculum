@@ -48,7 +48,7 @@ final class EmpresaController extends AbstractController
     #[Route(name: 'api_empresa_new', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
-        $data = Json_decode($request->getContent(), true);
+        $data = Json_decode($request->getContent());
 
         //si datos vacios o no están los obligatorios, devolver mensaje de error
         if (!$data || !isset($data->nombre, $data->email)) {
@@ -90,7 +90,7 @@ final class EmpresaController extends AbstractController
     public function show(Empresa $empresa): JsonResponse
     {
         $data = [
-          'id' => $empresa->getId(),
+           'id' => $empresa->getId(),
            'nombre' => $empresa->getNombre(),
            'email' => $empresa->getEmail(),
            'telefono' => $empresa->getTelefono(),

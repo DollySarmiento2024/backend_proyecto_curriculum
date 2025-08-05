@@ -34,10 +34,10 @@ final class OfertaEmpleoController extends AbstractController
                 'titulo' => $ofertaEmpleo->getTitulo(),
                 'descripcion' => $ofertaEmpleo->getDescripcion(),
                 'ubicacion' => $ofertaEmpleo->getUbicacion(),
-                'tipo_contrato' => $ofertaEmpleo->getTipoContrato(),
+                'tipo_contrato' => $ofertaEmpleo->getTipo_contrato(),
                 'salario' => $ofertaEmpleo->getSalario(),
                 'fecha_publicacion' => $ofertaEmpleo->getFechaPublicacion(),
-                'id_empresa' => $ofertaEmpleo->getEmpresa()->getId(), /*ToDo traer datos empresa*/
+                'id_empresa' => $ofertaEmpleo->getEmpresa()->getId(),
             ];
         }
         return new JsonResponse(['ofertaEmpleos' => $data], Response::HTTP_OK);
@@ -63,7 +63,7 @@ final class OfertaEmpleoController extends AbstractController
             ubicacion: $data->ubicacion,
             tipo_contrato: $data->tipo_contrato,
             salario: $data->salario,
-            fecha_publicacion: $data->fecha_publicacion,
+            fecha_publicacion: new \DateTimeImmutable($data->fecha_publicacion),
             empresa: $empresa);
 
         return new JsonResponse([
@@ -91,15 +91,12 @@ final class OfertaEmpleoController extends AbstractController
         foreach ($ofertas as $oferta) {
             $data[] = [
                 'id' => $oferta->getId(),
-                'nombre' => $oferta->getNombre(),
-                'email' => $oferta->getEmail(),
-                'telefono' => $oferta->getTelefono(),
-                'direccion' => $oferta->getDireccion(),
-                'ciudad' => $oferta->getCiudad(),
-                'sector' => $oferta->getSector(),
+                'titulo' => $oferta->getTitulo(),
                 'descripcion' => $oferta->getDescripcion(),
-                'logo' => $oferta->getLogo(),
-                'sitio_web' => $oferta->getSitioWeb(),
+                'ubicacion' => $oferta->getUbicacion(),
+                'tipo_contrato' => $oferta->getTipoContrato(),
+                'salario' => $oferta->getSalario(),
+                'fecha_publicacion' => $oferta->getFechaPublicacion(),
                 'id_empresa' => $oferta->getEmpresa()->getId()
             ];
         }
@@ -116,7 +113,7 @@ final class OfertaEmpleoController extends AbstractController
 
             $data_empresa[] = [
                 'id' => $empresa->getId(),
-                'nombre' => $empresa->getNombre(),
+                'titulo' => $empresa->getNombre(),
                 'email' => $empresa->getEmail(),
                 'telefono' => $empresa->getTelefono(),
                 'direccion' => $empresa->getDireccion(),
@@ -125,6 +122,7 @@ final class OfertaEmpleoController extends AbstractController
                 'descripcion' => $empresa->getDescripcion(),
                 'logo' => $empresa->getLogo(),
                 'sitio_web' => $empresa->getSitioWeb(),
+                'redes_sociales' => $empresa->getRedesSociales(),
             ];
 
 
@@ -175,7 +173,7 @@ final class OfertaEmpleoController extends AbstractController
             $ofertaEmpleo->setSalario($data->salario);
         }
         if (!empty($data->fecha_publicacion)) {
-            $ofertaEmpleo->setFechaPublicacion($data->fecha_publicacion);
+            $ofertaEmpleo->setFechaPublicacion(new \DateTimeImmutable($data->fecha_publicacion));
         }
         if (!empty($data->empresa_id)) {
             $ofertaEmpleo->setEmpresa($data->empresa);

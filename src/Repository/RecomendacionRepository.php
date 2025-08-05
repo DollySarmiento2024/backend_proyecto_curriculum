@@ -36,7 +36,7 @@ class RecomendacionRepository extends ServiceEntityRepository
         }
     }
 
-    public function new(string $score, \DateTime $fecha, Usuario $usuario, OfertaEmpleo $oferta_empleo): int
+    public function new(float $score, \DateTime $fecha, Usuario $usuario, OfertaEmpleo $oferta_empleo): int
     {
         $recomendacion = new Recomendacion();
         $recomendacion ->setScore($score);
