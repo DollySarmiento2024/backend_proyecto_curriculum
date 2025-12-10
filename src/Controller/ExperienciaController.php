@@ -35,8 +35,8 @@ final class ExperienciaController extends AbstractController
                 'id' => $experiencia->getId(),
                 'puesto' => $experiencia->getPuesto(),
                 'empresa' => $experiencia->getEmpresa(),
-                'fecha_inicio' => $experiencia->getFechaInicio(),
-                'fecha_fin' => $experiencia->getFechaFin(),
+                'fecha_inicio' => $experiencia->getFechaInicio()->format("Y-m-d"),
+                'fecha_fin' => $experiencia->getFechaFin()->format("Y-m-d"),
                 'descripcion' => $experiencia->getDescripcion(),
                 'id_usuario' => $experiencia->getUsuario()->getId(),
             ];
@@ -88,8 +88,8 @@ final class ExperienciaController extends AbstractController
             'id' => $experiencia->getId(),
             'puesto' => $experiencia->getPuesto(),
             'empresa' => $experiencia->getEmpresa(),
-            'fecha_inicio' => $experiencia->getFechaInicio(),
-            'fecha_fin' => $experiencia->getFechaFin(),
+            'fecha_inicio' => $experiencia->getFechaInicio()->format("Y-m-d"),
+            'fecha_fin' => $experiencia->getFechaFin()->format("Y-m-d"),
             'descripcion' => $experiencia->getDescripcion(),
             'id_usuario' => $experiencia->getUsuario()->getId(),
         ];

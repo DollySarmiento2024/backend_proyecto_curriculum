@@ -93,8 +93,8 @@ final class UsuarioController extends AbstractController
                 'id' => $formacion->getId(),
                 'titulo' => $formacion->getTitulo(),
                 'centro' =>$formacion->getCentro(),
-                'fecha_inicio' =>$formacion->getFechaInicio(),
-                'fecha_fin' =>$formacion->getFechaFin(),
+                'fecha_inicio' =>$formacion->getFechaInicio()->format("Y-m-d"),
+                'fecha_fin' =>$formacion->getFechaFin()->format("Y-m-d"),
                 'descripcion' =>$formacion->getDescripcion(),
                 'id_usuario' =>$formacion->getUsuario()->getId(),
             ];
@@ -108,8 +108,8 @@ final class UsuarioController extends AbstractController
                 'id' => $experiencia->getId(),
                 'puesto' =>$experiencia->getPuesto(),
                 'empresa' =>$experiencia->getEmpresa(),
-                'fecha_inicio' => $experiencia->getFechaInicio(),
-                'fecha_fin' => $experiencia->getFechaFin(),
+                'fecha_inicio' => $experiencia->getFechaInicio()->format("Y-m-d"),
+                'fecha_fin' => $experiencia->getFechaFin()->format("Y-m-d"),
                 'descripcion' => $experiencia->getDescripcion(),
                 'id_usuario' => $experiencia->getUsuario()->getId(),
             ];
@@ -164,11 +164,11 @@ final class UsuarioController extends AbstractController
             'redes_sociales' => $usuario->getRedesSociales(),
             'foto' => $usuario->getFoto(),
             'resumen_perfil' => $usuario->getResumenPerfil(),
-            'formaciones' => [ $data_formaciones ],
-            'experiencia' => [ $data_experiencias ],
-            'habilidad' => [$data_habilidades],
-            'idioma' => [$data_idioma],
-            'conocimiento' => [$data_conocimiento]
+            'formaciones' => $data_formaciones ,
+            'experiencias' => $data_experiencias ,
+            'habilidades' => $data_habilidades,
+            'idiomas' => $data_idioma,
+            'conocimientos' => $data_conocimiento
         ];
         return new JsonResponse($data, Response::HTTP_OK);
     }
@@ -216,7 +216,7 @@ final class UsuarioController extends AbstractController
         if (!empty($data->foto)) {
             $usuario->setFoto($data->foto);
         }
-        if (!empty($data->resumenPerfil)) {
+        if (!empty($data->resumen_perfil)) {
             $usuario->setResumenPerfil($data->resumen_perfil);
         }
         $this->usuarioRepository->save($usuario, true);

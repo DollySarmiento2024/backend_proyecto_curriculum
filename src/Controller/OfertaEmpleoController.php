@@ -34,9 +34,9 @@ final class OfertaEmpleoController extends AbstractController
                 'titulo' => $ofertaEmpleo->getTitulo(),
                 'descripcion' => $ofertaEmpleo->getDescripcion(),
                 'ubicacion' => $ofertaEmpleo->getUbicacion(),
-                'tipo_contrato' => $ofertaEmpleo->getTipo_contrato(),
+                'tipo_contrato' => $ofertaEmpleo->getTipoContrato(),
                 'salario' => $ofertaEmpleo->getSalario(),
-                'fecha_publicacion' => $ofertaEmpleo->getFechaPublicacion(),
+                'fecha_publicacion' => $ofertaEmpleo->getFechaPublicacion()->format("Y-m-d"),
                 'id_empresa' => $ofertaEmpleo->getEmpresa()->getId(),
             ];
         }
@@ -96,7 +96,7 @@ final class OfertaEmpleoController extends AbstractController
                 'ubicacion' => $oferta->getUbicacion(),
                 'tipo_contrato' => $oferta->getTipoContrato(),
                 'salario' => $oferta->getSalario(),
-                'fecha_publicacion' => $oferta->getFechaPublicacion(),
+                'fecha_publicacion' => $oferta->getFechaPublicacion()->format("Y-m-d"),
                 'id_empresa' => $oferta->getEmpresa()->getId()
             ];
         }
@@ -133,7 +133,7 @@ final class OfertaEmpleoController extends AbstractController
             'ubicacion' => $ofertaEmpleo->getUbicacion(),
             'tipo_contrato' => $ofertaEmpleo->getTipoContrato(),
             'salario' => $ofertaEmpleo->getSalario(),
-            'fecha_publicacion' => $ofertaEmpleo->getFechaPublicacion(),
+            'fecha_publicacion' => $ofertaEmpleo->getFechaPublicacion()->format("Y-m-d"),
             'empresa' => [$data_empresa]
         ];
         return new JsonResponse( $data, Response::HTTP_OK);

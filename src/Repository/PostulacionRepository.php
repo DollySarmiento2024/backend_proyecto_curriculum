@@ -27,9 +27,9 @@ class PostulacionRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(Postulacion $postulacion, bool $flush = false): void
+    public function remove(Postulacion $entity, bool $flush = false): void
     {
-        $this->getEntityManager()->remove($postulacion);
+        $this->getEntityManager()->remove($entity);
         if ($flush) {
             $this->getEntityManager()->flush();
         }

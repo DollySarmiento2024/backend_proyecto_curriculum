@@ -28,7 +28,7 @@ use Symfony\Component\Routing\Attribute\Route;
             $this->ofertaEmpleoRepository = $ofertaEmpleoRep;
        }
 
-        #[Route(name: 'app_postulacion')]
+        #[Route(name: 'api_postulacion', methods: ['GET'])]
         public function index(PostulacionRepository $postulacionRep): JsonResponse
         {
             $postulaciones = $this->postulacionRepository->findAll();
@@ -36,7 +36,7 @@ use Symfony\Component\Routing\Attribute\Route;
             foreach ($postulaciones as $postulacion) {
                 $data[] = [
                     'id' => $postulacion->getId(),
-                    'fecha' =>$postulacion->getFecha(),
+                    'fecha' =>$postulacion->getFecha()->format("Y-m-d"),
                     'carta_presentacion' =>$postulacion->getCartaPresentacion(),
                     'estado' =>$postulacion->getEstado(),
                     'score' =>$postulacion->getScore(),
@@ -47,7 +47,7 @@ use Symfony\Component\Routing\Attribute\Route;
             return new JsonResponse(['postulaciones' => $data], Response::HTTP_OK);
         }
 
-        #[Route(name: 'app_postulacion_new', methods: ['POST'])]
+        #[Route(name: 'api_postulacion_new', methods: ['POST'])]
         public function add(Request $request): JsonResponse
         {
             $data = json_decode($request->getContent());
@@ -84,14 +84,35 @@ use Symfony\Component\Routing\Attribute\Route;
            ],  Response::HTTP_CREATED);
         }
 
-      #[Route('/{id}', name: 'app_postulacion_show', methods: ['GET'])]
+        //Mostrar datos de las postulaciones de un usuario
+        #[Route('/usuario/{id}', name: 'api_postulacion_usuario', methods: ['GET'])]
+        public function indexByUsuario(int $id): JsonResponse
+        {
+            $usuario = $this->usuarioRepository->find($id);
+            $postulaciones = $this->postulacionRepository->findBy(['usuario' => $usuario]);
+            $data = [];
+            foreach ($postulaciones as $postulacion) {
+                $data[] = [
+                    'id' => $postulacion->getId(),
+                    'fecha' =>$postulacion->getFecha()->format("Y-m-d"),
+                    'carta_presentacion' =>$postulacion->getCartaPresentacion(),
+                    'estado' =>$postulacion->getEstado(),
+                    'score' =>$postulacion->getScore(),
+                    'id_usuario' =>$postulacion->getUsuario()->getId(),
+                    'id_oferta_empleo' =>$postulacion->getOfertaEmpleo()->getId(),
+                ];
+            }
+            return new JsonResponse(['postulaciones' => $data], Response::HTTP_OK);
+        }
+
+
+      #[Route('/{id}', name: 'api_postulacion_show', methods: ['GET'])]
       public function show(Postulacion $postulacion): JsonResponse
       {
           //Usuario
-          $data_usuario = [];
-          $usuarios = $postulacion->getUsuario();
-          foreach ($usuarios as $usuario ) {
-              $data_usuario[] = [
+          $usuario = $postulacion->getUsuario();
+
+          $data_usuario = [
                   'id' => $usuario->getId(),
                   'nombre' => $usuario->getNombre(),
                   'apellidos' => $usuario->getApellidos(),
@@ -102,42 +123,40 @@ use Symfony\Component\Routing\Attribute\Route;
                   'redes_sociales' => $usuario->getRedesSociales(),
                   'foto' => $usuario->getFoto(),
                   'resumen_perfil' => $usuario->getResumenPerfil(),
-              ];
-          }
+          ];
+
 
           //Oferta empleo
-          $data_oferta_empleo = [];
-          $oferta_empleos = $postulacion->getOfertaEmpleo();
-          foreach ($oferta_empleos as $oferta_empleo) {
-              $data_oferta_empleo[] = [
+          $oferta_empleo = $postulacion->getOfertaEmpleo();
+          $data_oferta_empleo = [
                   'id' => $oferta_empleo->getId(),
                   'titulo' => $oferta_empleo->getTitulo(),
                   'descripcion' => $oferta_empleo->getDescripcion(),
                   'ubicacion' => $oferta_empleo->getUbicacion(),
                   'tipo_contrato' => $oferta_empleo->getTipoContrato(),
                   'salario' => $oferta_empleo->getSalario(),
-                  'fecha_publicacion' => $oferta_empleo->getFechaPublicacion(),
+                  'fecha_publicacion' => $oferta_empleo->getFechaPublicacion()->format("Y-m-d"),
                   'id_empresa' =>$oferta_empleo->getEmpresa()->getId(),
               ];
-          }
+
 
           $data = [
                 'id' => $postulacion->getId(),
-                'fecha' =>$postulacion->getFecha(),
+                'fecha' =>$postulacion->getFecha()->format("Y-m-d"),
                 'carta_presentacion' =>$postulacion->getCartaPresentacion(),
                 'estado' =>$postulacion->getEstado(),
                 'score' => $postulacion->getScore(),
-                'usuario' =>[$data_usuario],
-                'oferta_empleo'=>[$data_oferta_empleo]
+                'usuario' => $data_usuario,
+                'oferta_empleo'=> $data_oferta_empleo
             ];
           return new JsonResponse($data, Response::HTTP_OK);
       }
 
-        #[Route('/{id}', name: 'app_postulacion_edit', methods: ['PUT', 'PATCH'])]
-        public function edit($id, Request $request): JsonResponse
+        #[Route('/{id}', name: 'api_postulacion_edit', methods: ['PUT', 'PATCH'])]
+        public function edit(int $id, Request $request): JsonResponse
         {
             $postulacion = $this->postulacionRepository->find($id);
-            $data = json_decode($request->getContent());
+            $data = Json_decode($request->getContent());
 
             //si datos vacios, devolver mensaje de error
             if (!$data){
@@ -150,12 +169,11 @@ use Symfony\Component\Routing\Attribute\Route;
             } else {
                 $mensaje = 'Postulacion actualizada parcialmente';
             }
-
-            if (!empty($data->fecha)) {
-                $postulacion->setFecha($data->fecha);
-            }
             if (!empty($data->carta_presentacion)) {
                 $postulacion->setCartaPresentacion($data->carta_presentacion);
+            }
+            if (!empty($data->fecha)) {
+                $postulacion->setFecha(new \DateTimeImmutable($data->fecha));
             }
             if (!empty($data->estado)) {
                 $postulacion->setEstado($data->estado);
@@ -163,7 +181,6 @@ use Symfony\Component\Routing\Attribute\Route;
             if (!empty($data->score)) {
                 $postulacion->setScore($data->score);
             }
-
             if (!empty($data->usuario_id)) {
                 $postulacion->setUsuario($data->usuario);
             }
@@ -174,7 +191,7 @@ use Symfony\Component\Routing\Attribute\Route;
             return new JsonResponse(['status' => $mensaje], Response::HTTP_OK);
         }
 
-        #[Route('/{id}', name: 'app_postulacion_delete', methods: ['DELETE'])]
+        #[Route('/{id}', name: 'api_postulacion_delete', methods: ['DELETE'])]
         public function remove(Postulacion $postulacion): JsonResponse
         {
             $id = $postulacion->getId();

@@ -16,7 +16,7 @@ class ConocimientoRepository extends ServiceEntityRepository
         parent::__construct($registry, Conocimiento::class);
     }
 
-    public function save(Conocimiento $entity, bool $flush = true): void
+    public function save(Conocimiento $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
         if ($flush) {
@@ -24,7 +24,7 @@ class ConocimientoRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(Conocimiento $entity, bool $flush = true): void
+    public function remove(Conocimiento $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
         if ($flush) {

@@ -35,8 +35,8 @@ final class FormacionController extends AbstractController
                 'id' => $formacion->getId(),
                 'titulo' => $formacion->getTitulo(),
                 'centro' =>$formacion->getCentro(),
-                'fecha_inicio' =>$formacion->getFechaInicio(),
-                'fecha_fin' =>$formacion->getFechaFin(),
+                'fecha_inicio' =>$formacion->getFechaInicio()->format("Y-m-d"),
+                'fecha_fin' =>$formacion->getFechaFin()->format("Y-m-d"),
                 'descripcion' =>$formacion->getDescripcion(),
                 'id_usuario' =>$formacion->getUsuario()->getId(),
             ];
@@ -88,8 +88,8 @@ final class FormacionController extends AbstractController
             'id' => $formacion->getId(),
             'titulo' => $formacion->getTitulo(),
             'centro' => $formacion->getCentro(),
-            'fecha_inicio' => $formacion->getFechaInicio(),
-            'fecha_fin' => $formacion->getFechaFin(),
+            'fecha_inicio' => $formacion->getFechaInicio()->format("Y-m-d"),
+            'fecha_fin' => $formacion->getFechaFin()->format("Y-m-d"),
             'descripcion' => $formacion->getDescripcion(),
             'id_usuario' => $formacion->getUsuario()->getId(),
         ];

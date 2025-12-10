@@ -28,7 +28,7 @@ final class RecomendacionController extends AbstractController
     }
 
     //listar las recomendaciones
-    #[Route(name: 'app_recomendacion', methods: ['GET'])]
+    #[Route(name: 'api_recomendacion', methods: ['GET'])]
     public function index(RecomendacionRepository $recomendacionRep): JsonResponse
     {
         $recomendaciones = $this->recomendacionRepository->findAll();
@@ -37,7 +37,7 @@ final class RecomendacionController extends AbstractController
             $data[] = [
                 'id' => $recomendacion->getId(),
                 'score' => $recomendacion->getScore(),
-                'fecha' => $recomendacion->getFecha(),
+                'fecha' => $recomendacion->getFecha()->format("Y-m-d"),
                 'id_usuario' => $recomendacion->getUsuario()->getId(),
                 'id_oferta_empleo' => $recomendacion->getOfertaEmpleo()->getId(),
             ];
@@ -46,7 +46,7 @@ final class RecomendacionController extends AbstractController
     }
 
     //crear nueva recomendacion
-    #[Route(name: 'app_recomencion_new', methods: ['POST'])]
+    #[Route(name: 'api_recomencion_new', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent());
@@ -60,11 +60,12 @@ final class RecomendacionController extends AbstractController
         $usuario = $this->usuarioRepository->find($data->id_usuario);
         $oferta_empleo = $this->ofertaEmpleoRepository->find($data->id_oferta_empleo);
 
+        $fecha_actual = new \DateTime();//date("Y-m-d H:i:s");
          $new_id = $this->recomendacionRepository->new(
             score: $data->score,
             fecha: new DateTime($data->fecha),
-            usuario: $usuario,
-            oferta_empleo: $oferta_empleo);
+             usuario: $usuario,
+             oferta_empleo: $oferta_empleo);
 
         return new JsonResponse([
             'status' => 'Usuario registrado correctamente',
@@ -77,50 +78,65 @@ final class RecomendacionController extends AbstractController
         ], Response::HTTP_CREATED);
     }
 
-    //mostrar datos de una recomendacion
+
+    #[Route('/usuario/{id}', name: 'api_recomendacion_usuario', methods: ['GET'])]
+    public function indexByUsuario(int $id): JsonResponse
+    {
+        $usuario = $this->usuarioRepository->find($id);
+        $recomendaciones = $this->recomendacionRepository->findBy(['usuario' => $usuario]);
+        $data = [];
+        foreach ($recomendaciones as $recomendacion) {
+            $data[] = [
+                'id' => $recomendacion->getId(),
+                'score' => $recomendacion->getScore(),
+                'fecha' => $recomendacion->getFecha()->format("Y-m-d"),
+                'id_usuario' => $recomendacion->getUsuario()->getId(),
+                'id_oferta_empleo' =>$recomendacion->getOfertaEmpleo()->getId(),
+            ];
+        }
+        return new JsonResponse(['recomendaciones' => $data], Response::HTTP_OK);
+    }
+
+     //mostrar datos de una recomendacion
     #[Route('/{id}', name: 'api_recomendacion_show', methods: ['GET'])]
     public function show(Recomendacion $recomendacion): JsonResponse
     {
         //usuario
-        $data_usuario = [];
-        $usuarios = $recomendacion->getUsuario();
-        foreach ($usuarios as $usuario) {
-            $data_usuario[] = [
+        $usuario = $recomendacion->getUsuario();
+
+        $data_usuario[] = [
                 'id' => $usuario->getId(),
                 'nombre' => $usuario->getNombre(),
-                'apellidos' => $usuario->getCentro(),
-                'email' => $usuario->getFechaInicio(),
-                'telefono' => $usuario->getFechaFin(),
-                'direccion' => $usuario->getDescripcion(),
+                'apellidos' => $usuario->getApellidos(),
+                'email' => $usuario->getEmail(),
+                'telefono' => $usuario->getTelefono(),
+                'direccion' => $usuario->getDireccion(),
                 'ciudad' => $usuario->getCiudad(),
-                'redes_sociales' => $usuario->setRedesSociales(),
+                'redes_sociales' => $usuario->getRedesSociales(),
                 'foto' => $usuario->getFoto(),
                 'resumen_perfil' => $usuario->getResumenPerfil(),
-            ];
-        }
+        ];
+
 
         //oferta empleo
-        $data_oferta_empleo = [];
-        $oferta_empleos = $recomendacion->getOfertaEmpleo();
-        foreach ($oferta_empleos as $oferta_empleo) {
-            $data_oferta_empleo = [
+        $oferta_empleo = $recomendacion->getOfertaEmpleo();
+        $data_oferta_empleo = [
                 'id' => $oferta_empleo->getId(),
                 'titulo' => $oferta_empleo->getTitulo(),
                 'descripcion' => $oferta_empleo->getDescripcion(),
                 'ubicacion' => $oferta_empleo->getUbicacion(),
                 'tipo_contrato' => $oferta_empleo->getTipoContrato(),
                 'salario' => $oferta_empleo->getSalario(),
-                'fecha_publicacion' => $oferta_empleo->getFechaPublicacion(),
+                'fecha_publicacion' => $oferta_empleo->getFechaPublicacion()->format("Y-m-d"),
                 'id_empresa' =>$oferta_empleo->getEmpresa()->getId(),
-            ];
-        }
+        ];
 
         $data = [
             'id' => $recomendacion->getId(),
             'score' => $recomendacion->getScore(),
-            'fecha' => $recomendacion->getFecha(),
-            'usuario' => [$data_usuario],
-            'oferta_empleo' => [$data_oferta_empleo]
+            'fecha' => $recomendacion->getFecha()->format("Y-m-d"),
+            'usuario' => $data_usuario,
+            'oferta_empleo' => $data_oferta_empleo
         ];
         return new JsonResponse ($data, Response::HTTP_OK);
     }
@@ -131,7 +147,7 @@ final class RecomendacionController extends AbstractController
     public  function edit(int $id, Request $request): JsonResponse
     {
         $recomendacion = $this->recomendacionRepository->find($id);
-        $data = json_decode($request->getContent());
+        $data = Json_decode($request->getContent());
 
        //si datos vacios, devolver mensaje de error
         if (!$data) {
