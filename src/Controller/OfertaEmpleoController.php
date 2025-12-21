@@ -22,11 +22,21 @@ final class OfertaEmpleoController extends AbstractController
         $this->empresaRepository = $empresaRep;
     }
 
-    //listar todas las ofertas de empleo
+    //listar todas las ofertas de empleo con filtro
     #[Route(name: 'api_oferta_empleo', methods: ['GET'])]
-    public function index(OfertaEmpleoRepository $ofertaEmpleoRep): JsonResponse
+    public function index(Request $request, OfertaEmpleoRepository $ofertaEmpleoRep): JsonResponse
     {
-        $ofertaEmpleos = $this->ofertaEmpleoRepository->findAll();
+        $filtros = $request->query->all();
+        if (empty($filtros))
+        { //obtenemos todas las ofertas
+            $ofertaEmpleos = $this->ofertaEmpleoRepository->findAll();
+
+        }
+        else
+        {  //obtenemos las ofertas que cumplen el filtro
+            $ofertaEmpleos = $this->ofertaEmpleoRepository->findByFilter($filtros);
+        }
+
         $data = [];
         foreach ($ofertaEmpleos as $ofertaEmpleo) {
             $data[] = [
@@ -40,7 +50,7 @@ final class OfertaEmpleoController extends AbstractController
                 'id_empresa' => $ofertaEmpleo->getEmpresa()->getId(),
             ];
         }
-        return new JsonResponse(['ofertaEmpleos' => $data], Response::HTTP_OK);
+        return new JsonResponse(['ofertas' => $data], Response::HTTP_OK);
     }
 
     //crear nuevo oferta de empleo

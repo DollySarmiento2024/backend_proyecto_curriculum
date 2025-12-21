@@ -53,7 +53,8 @@ use Symfony\Component\Routing\Attribute\Route;
             $data = json_decode($request->getContent());
 
             //si datos vacios o no están los obligatorios, devolver mensaje de error
-            if(!$data || !isset($data->fecha, $data->score, $data->estado)){
+            //el score no es obligatorio
+            if(!$data || !isset($data->fecha, $data->estado)){
                 return new JsonResponse(['error' => 'No se pudo guardar el registro'], Response::HTTP_BAD_REQUEST);
             }
 
@@ -66,7 +67,7 @@ use Symfony\Component\Routing\Attribute\Route;
                 fecha: new \DateTimeImmutable($data->fecha),
                 carta_presentacion: $data->carta_presentacion,
                 estado: $data->estado,
-                score: $data->score,
+                score: $data->score ?? 0,
                 usuario: $usuario,
                 oferta_empleo: $oferta_empleo);
 
@@ -77,7 +78,7 @@ use Symfony\Component\Routing\Attribute\Route;
                     'fecha' => $fecha_actual,
                     'carta_presentacion' => $data->carta_presentacion,
                     'estado' => $data->estado,
-                    'score' => $data->score,
+                    'score' => $data->score ?? 0,
                     'id_usuario' => $data->id_usuario,
                     'id_oferta_empleo' => $data->id_oferta_empleo,
                 ]
@@ -90,8 +91,24 @@ use Symfony\Component\Routing\Attribute\Route;
         {
             $usuario = $this->usuarioRepository->find($id);
             $postulaciones = $this->postulacionRepository->findBy(['usuario' => $usuario]);
+
+
             $data = [];
             foreach ($postulaciones as $postulacion) {
+
+                //Oferta empleo
+                $oferta_empleo = $postulacion->getOfertaEmpleo();
+                $data_oferta_empleo = [
+                    'id' => $oferta_empleo->getId(),
+                    'titulo' => $oferta_empleo->getTitulo(),
+                    'descripcion' => $oferta_empleo->getDescripcion(),
+                    'ubicacion' => $oferta_empleo->getUbicacion(),
+                    'tipo_contrato' => $oferta_empleo->getTipoContrato(),
+                    'salario' => $oferta_empleo->getSalario(),
+                    'fecha_publicacion' => $oferta_empleo->getFechaPublicacion()->format("Y-m-d"),
+                    'id_empresa' =>$oferta_empleo->getEmpresa()->getId(),
+                ];
+
                 $data[] = [
                     'id' => $postulacion->getId(),
                     'fecha' =>$postulacion->getFecha()->format("Y-m-d"),
@@ -100,6 +117,7 @@ use Symfony\Component\Routing\Attribute\Route;
                     'score' =>$postulacion->getScore(),
                     'id_usuario' =>$postulacion->getUsuario()->getId(),
                     'id_oferta_empleo' =>$postulacion->getOfertaEmpleo()->getId(),
+                    'oferta_empleo' => $data_oferta_empleo,
                 ];
             }
             return new JsonResponse(['postulaciones' => $data], Response::HTTP_OK);

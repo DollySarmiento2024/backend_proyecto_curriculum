@@ -86,12 +86,26 @@ final class RecomendacionController extends AbstractController
         $recomendaciones = $this->recomendacionRepository->findBy(['usuario' => $usuario]);
         $data = [];
         foreach ($recomendaciones as $recomendacion) {
+            //Oferta empleo
+            $oferta_empleo = $recomendacion->getOfertaEmpleo();
+            $data_oferta_empleo = [
+                'id' => $oferta_empleo->getId(),
+                'titulo' => $oferta_empleo->getTitulo(),
+                'descripcion' => $oferta_empleo->getDescripcion(),
+                'ubicacion' => $oferta_empleo->getUbicacion(),
+                'tipo_contrato' => $oferta_empleo->getTipoContrato(),
+                'salario' => $oferta_empleo->getSalario(),
+                'fecha_publicacion' => $oferta_empleo->getFechaPublicacion()->format("Y-m-d"),
+                'id_empresa' =>$oferta_empleo->getEmpresa()->getId(),
+            ];
+
             $data[] = [
                 'id' => $recomendacion->getId(),
                 'score' => $recomendacion->getScore(),
                 'fecha' => $recomendacion->getFecha()->format("Y-m-d"),
                 'id_usuario' => $recomendacion->getUsuario()->getId(),
                 'id_oferta_empleo' =>$recomendacion->getOfertaEmpleo()->getId(),
+                'oferta_empleo' => $data_oferta_empleo
             ];
         }
         return new JsonResponse(['recomendaciones' => $data], Response::HTTP_OK);

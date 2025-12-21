@@ -49,6 +49,42 @@ class OfertaEmpleoRepository extends ServiceEntityRepository
         //devolvemos id creado
         return $ofertaEmpleo->getId();
     }
+
+    public function findByFilter(array $filtros): array {
+
+        $qb = $this->createQueryBuilder('o');
+
+        // Cargo o empresa (título o descripción)
+        if (!empty($filtros['filtro_oferta_empleo'])) {
+            $qb->andWhere('o.titulo LIKE :texto OR o.descripcion LIKE :texto')
+                ->setParameter('texto', '%' . $filtros['filtro_oferta_empleo'] . '%');
+        }
+
+        // Ubicación
+        if (!empty($filtros['filtro_ubicacion'])) {
+            $qb->andWhere('o.ubicacion LIKE :ubicacion')
+                ->setParameter('ubicacion', '%' . $filtros['filtro_ubicacion'] . '%');
+        }
+
+        // Tipo de contrato (ignorar "todos")
+        if (
+            !empty($filtros['filtro_contrato']) &&
+            $filtros['filtro_contrato'] !== 'contrato_todos'
+        ) {
+            $qb->andWhere('o.tipo_contrato = :contrato')
+                ->setParameter('contrato', $filtros['filtro_contrato']);
+        }
+
+        // Fecha de publicación (desde)
+        if (!empty($filtros['filtro_fecha'])) {
+            $qb->andWhere('o.fecha_publicacion >= :fecha')
+                ->setParameter('fecha', new \DateTimeImmutable($filtros['filtro_fecha']));
+        }
+
+        $query = $qb->orderBy('o.fecha_publicacion', 'DESC')->getQuery();
+        return $query->execute();
+    }
+
 }
     //    /**
     //     * @return OfertaEmpleo[] Returns an array of OfertaEmpleo objects
