@@ -12,10 +12,12 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-    #[Route('/postulacion')]
-    final class PostulacionController extends AbstractController
-    {
+#[Route('/api/postulacion')]
+#[IsGranted('ROLE_USER')]
+final class PostulacionController extends AbstractController
+{
        private PostulacionRepository $postulacionRepository;
        private UsuarioRepository $usuarioRepository;
        private OfertaEmpleoRepository $ofertaEmpleoRepository;
@@ -216,7 +218,7 @@ use Symfony\Component\Routing\Attribute\Route;
             $this->postulacionRepository->remove($postulacion, flush: true);
             return new JsonResponse(['status' => 'postulacion con id ' . $id . ' eliminada correctamente'], Response::HTTP_OK);
         }
-   }
+}
 
 //    #[Route('/postulacion', name: 'app_postulacion')]
 //    public function index(): Response

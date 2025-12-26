@@ -23,7 +23,7 @@ class Empresa
     private string $email;
 
     #[ORM\Column(name: 'telefono', type:Types::STRING, length: 20, nullable: true)]
-    private string $telefono;
+    private ?string $telefono = null;
 
     #[ORM\Column(name: 'direccion', type:Types::STRING, length: 255, nullable: true)]
     private ?string $direccion = null;
@@ -52,6 +52,14 @@ class Empresa
      */
     #[ORM\OneToMany(targetEntity: OfertaEmpleo::class, mappedBy: 'empresa', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $ofertas_empleo;
+
+    /*
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private Account $account;*/
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Account $account = null;
 
     public function __construct()
     {
@@ -83,12 +91,12 @@ class Empresa
         $this->email = $email;
     }
 
-    public function getTelefono(): string
+    public function getTelefono(): ?string
     {
         return $this->telefono;
     }
 
-    public function setTelefono(string $telefono): void
+    public function setTelefono(?string $telefono): void
     {
         $this->telefono = $telefono;
     }
@@ -190,6 +198,18 @@ class Empresa
                 $oferta_empleo->setEmpresa(null);
             }
         }
+        return $this;
+    }
+
+    public function getAccount(): Account
+    {
+        return $this->account;
+    }
+
+    public function setAccount(Account $account): static
+    {
+        $this->account = $account;
+
         return $this;
     }
 }

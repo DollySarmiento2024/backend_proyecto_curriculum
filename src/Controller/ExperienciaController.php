@@ -10,8 +10,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/experiencia')]
+#[Route('/api/experiencia')]
+#[IsGranted('ROLE_USER')]
 final class ExperienciaController extends AbstractController
 {
     private ExperienciaRepository $experienciaRepository;

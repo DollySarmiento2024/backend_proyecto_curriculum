@@ -9,8 +9,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/habilidad')]
+#[Route('/api/habilidad')]
+#[IsGranted('ROLE_USER')]
 final class HabilidadController extends AbstractController
 {
     private HabilidadRepository $habilidadRepository;

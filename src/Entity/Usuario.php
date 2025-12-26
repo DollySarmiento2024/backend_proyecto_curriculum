@@ -91,6 +91,14 @@ class Usuario
     #[ORM\OneToOne(targetEntity: Curriculum::class, mappedBy: 'usuario', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Curriculum $curriculum;
 
+    /*#[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private Account $account;*/
+
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Account $account = null;
+
 
     public function __construct()
     {
@@ -420,6 +428,18 @@ class Usuario
         }
 
         $this->curriculum = $curriculum;
+
+        return $this;
+    }
+
+    public function getAccount(): Account
+    {
+        return $this->account;
+    }
+
+    public function setAccount(Account $account): static
+    {
+        $this->account = $account;
 
         return $this;
     }

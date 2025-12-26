@@ -9,8 +9,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/oferta_empleo')]
+#[Route('/api/oferta_empleo')]
+
 final class OfertaEmpleoController extends AbstractController
 {
     private OfertaEmpleoRepository $ofertaEmpleoRepository;
@@ -23,6 +25,7 @@ final class OfertaEmpleoController extends AbstractController
     }
 
     //listar todas las ofertas de empleo con filtro
+    #[IsGranted('ROLE_USER')]
     #[Route(name: 'api_oferta_empleo', methods: ['GET'])]
     public function index(Request $request, OfertaEmpleoRepository $ofertaEmpleoRep): JsonResponse
     {
@@ -54,6 +57,7 @@ final class OfertaEmpleoController extends AbstractController
     }
 
     //crear nuevo oferta de empleo
+    #[IsGranted('ROLE_EMPRESA')]
     #[Route(name: 'api_oferta_empleo_new', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
@@ -150,6 +154,7 @@ final class OfertaEmpleoController extends AbstractController
     }
 
     //editar una oferta
+    #[IsGranted('ROLE_EMPRESA')]
     #[Route('/{id}', name: 'api_oferta_empleo_edit', methods: ['PUT', 'PATCH'])]
     public function edit($id, Request $request): JsonResponse
     {
@@ -192,6 +197,7 @@ final class OfertaEmpleoController extends AbstractController
         return new JsonResponse(['status' => $mensaje], Response::HTTP_OK);
     }
 
+    #[IsGranted('ROLE_EMPRESA')]
     #[Route('/{id}', name: 'api_oferta_empleo_delete', methods: ['DELETE'])]
     public function remove(OfertaEmpleo $ofertaEmpleo): JsonResponse
     {
