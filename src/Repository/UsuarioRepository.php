@@ -33,11 +33,10 @@ class UsuarioRepository extends ServiceEntityRepository
         }
     }
 
-    public function new(string $nombre, string $apellidos, string $email, string $telefono, string $direccion, string $ciudad, string $redes_sociales, string $foto, string $resumen_perfil): int
+    public function new(string $nombre, string $email, string $telefono, string $direccion, string $ciudad, string $redes_sociales, string $foto, string $resumen_perfil): int
     {
         $usuario = new Usuario();
         $usuario->setNombre($nombre);
-        $usuario->setApellidos($apellidos);
         $usuario->setEmail($email);
         $usuario->setTelefono($telefono);
         $usuario->setDireccion($direccion);

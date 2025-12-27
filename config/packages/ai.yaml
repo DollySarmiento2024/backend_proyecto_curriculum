@@ -1,0 +1,58 @@
+ai:
+    platform:
+        # Inference Platform configuration
+        # see https://github.com/symfony/ai/tree/main/src/platform#platform-bridges
+
+        # openai:
+        #    api_key: '%env(OPENAI_API_KEY)%'
+
+        gemini:
+            api_key: '%env(GEMINI_API_KEY)%'
+
+    agent:
+        # Agent configuration
+        # see https://symfony.com/doc/current/ai/bundles/ai-bundle.html
+
+        # default:
+        #    platform: 'ai.platform.openai'
+        #    model: 'gpt-5-mini'
+        #    prompt: |
+        #        You are a pirate and you write funny.
+        #    tools:
+        #        - 'Symfony\AI\Agent\Bridge\Clock\Clock'
+        evaluador_candidatos_ia:
+            platform: 'ai.platform.gemini'
+            model: 'gemini-2.5-flash'
+            prompt: |
+                Eres un sistema experto en análisis de recursos humanos y "job matching".
+                Tu misión es evaluar la idoneidad técnica y profesional de un CANDIDATO frente a una OFERTA DE EMPLEO.
+
+                REGLAS PARA LA PUNTUACIÓN (Score 0-100):
+                - 90-100: Match casi perfecto. Cumple todos los requisitos técnicos y años de experiencia.
+                - 70-89: Muy compatible, pero le falta algún requisito "deseable" o tiene algo menos de experiencia de la solicitada.
+                - 50-69: Candidato con base técnica pero requiere formación significativa en herramientas clave de la oferta.
+                - 0-49: No cumple los requisitos mínimos obligatorios.
+
+                REGLAS PARA LAS ANOTACIONES:
+                - Identifica máximo 3 puntos fuertes: Deben ser ventajas competitivas (ej. "Domina el stack exacto", "Experiencia en el sector").
+                - Identifica máximo 3 puntos débiles: Deben ser carencias críticas o riesgos (ej. "Falta de experiencia en liderazgo", "No menciona el idioma requerido").
+                - Sé breve.".
+
+                Analiza cuidadosamente: Formación académica, experiencia real, habilidad, idioma y conocimientos.
+                Debes responder ÚNICAMENTE con un objeto JSON.  No incluyas explicaciones, ni bloques de código Markdown, ni nada que no sea el JSON.
+                
+                Estructura::
+                {
+                    "score": <int entre 0 y 100>,
+                    "puntosFuertes": ["string", "string", "string"],
+                    "puntosDebiles": ["string", "string", "string"],
+                    "conclusion": "string"
+                }
+
+    store:
+        # Store configuration
+
+        # chromadb:
+        #    default:
+        #        client: 'client.service.id'
+        #        collection: 'my_collection'

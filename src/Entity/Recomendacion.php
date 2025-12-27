@@ -18,6 +18,15 @@ class Recomendacion
     #[ORM\Column(name: 'score', type: Types::DECIMAL, precision: 4, scale: 1)]
     private float $score;
 
+    #[ORM\Column(name:'puntos_fuertes', type: Types::JSON, nullable: true)]
+    private ?array $puntos_fuertes = null;
+
+    #[ORM\Column(name:'puntos_debiles', type: Types::JSON, nullable: true)]
+    private ?array $puntos_debiles = null;
+
+    #[ORM\Column(name:'conclusion', type:Types::TEXT)]
+    private string $conclusion;
+
     #[ORM\Column(name:'fecha', type: Types::DATETIME_MUTABLE)]
     private \DateTime $fecha;
 
@@ -28,6 +37,8 @@ class Recomendacion
     #[ORM\ManyToOne(targetEntity:OfertaEmpleo::class,inversedBy: 'recomendaciones')]
     #[ORM\JoinColumn(name:'id_oferta_empleo', referencedColumnName:'id')]
     private OfertaEmpleo $oferta_empleo;
+
+
 
     public function getId(): int
     {
@@ -42,6 +53,43 @@ class Recomendacion
     public function setScore(float $score): void
     {
         $this->score = $score;
+    }
+
+
+    public function getPuntosFuertes(): ?array
+    {
+        return $this->puntos_fuertes;
+    }
+
+    public function setPuntosFuertes(?array $puntos_fuertes): static
+    {
+        $this->puntos_fuertes = $puntos_fuertes;
+
+        return $this;
+    }
+
+    public function getPuntosDebiles(): ?array
+    {
+        return $this->puntos_debiles;
+    }
+
+    public function setPuntosDebiles(?array $puntos_debiles): static
+    {
+        $this->puntos_debiles = $puntos_debiles;
+
+        return $this;
+    }
+
+    public function getConclusion(): string
+    {
+        return $this->conclusion;
+    }
+
+    public function setConclusion(string $conclusion): static
+    {
+        $this->conclusion = $conclusion;
+
+        return $this;
     }
 
     public function getFecha(): \DateTime
@@ -73,6 +121,7 @@ class Recomendacion
     {
         $this->oferta_empleo = $oferta_empleo;
     }
+
 
 
 

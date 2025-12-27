@@ -20,9 +20,6 @@ class Usuario
     #[ORM\Column(name: 'nombre', type:Types::STRING, length: 100)]
     private string $nombre;
 
-    #[ORM\Column(name: 'apellidos', type:Types::STRING, length: 100)]
-    private string $apellidos;
-
     #[ORM\Column(name: 'email', type:Types::STRING, length: 100, unique: true)]
     private string $email;
 
@@ -125,16 +122,6 @@ class Usuario
     public function setNombre(string $nombre): void
     {
         $this->nombre = $nombre;
-    }
-
-    public function getApellidos(): string
-    {
-        return $this->apellidos;
-    }
-
-    public function setApellidos(string $apellidos): void
-    {
-        $this->apellidos = $apellidos;
     }
 
     public function getEmail(): string

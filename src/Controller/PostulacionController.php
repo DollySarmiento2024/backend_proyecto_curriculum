@@ -135,7 +135,6 @@ final class PostulacionController extends AbstractController
           $data_usuario = [
                   'id' => $usuario->getId(),
                   'nombre' => $usuario->getNombre(),
-                  'apellidos' => $usuario->getApellidos(),
                   'email' => $usuario->getEmail(),
                   'telefono' => $usuario->getTelefono(),
                   'direccion' => $usuario->getDireccion(),

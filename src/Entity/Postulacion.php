@@ -28,6 +28,15 @@ class Postulacion
     #[ORM\Column(name: 'score', type: Types::DECIMAL, precision: 4, scale: 1)]
     private float $score;
 
+    #[ORM\Column(name:'puntos_fuertes', type: Types::JSON, nullable: true)]
+    private ?array $puntos_fuertes = null;
+
+    #[ORM\Column(name:'puntos_debiles', type: Types::JSON, nullable: true)]
+    private ?array $puntos_debiles = null;
+
+    #[ORM\Column(name:'conclusion', type:Types::TEXT, length: 255)]
+    private string $conclusion;
+
     #[ORM\ManyToOne(targetEntity:Usuario::class, inversedBy: 'postulaciones')]
     #[ORM\JoinColumn(name:'id_usuario', referencedColumnName:'id')]
     private Usuario $usuario;
@@ -79,6 +88,36 @@ class Postulacion
     public function setScore(float $score): void
     {
         $this->score = $score;
+    }
+
+    public function getPuntosFuertes(): ?array
+    {
+        return $this->puntos_fuertes;
+    }
+
+    public function setPuntosFuertes(?array $puntos_fuertes): void
+    {
+        $this->puntos_fuertes = $puntos_fuertes;
+    }
+
+    public function getPuntosDebiles(): ?array
+    {
+        return $this->puntos_debiles;
+    }
+
+    public function setPuntosDebiles(?array $puntos_debiles): void
+    {
+        $this->puntos_debiles = $puntos_debiles;
+    }
+
+    public function getConclusion(): string
+    {
+        return $this->conclusion;
+    }
+
+    public function setConclusion(string $conclusion): void
+    {
+        $this->conclusion = $conclusion;
     }
 
     public function getUsuario(): Usuario

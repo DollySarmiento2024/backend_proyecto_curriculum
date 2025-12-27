@@ -105,7 +105,6 @@ final class RegisterController extends AbstractController
         } else {
             $usuario = new Usuario();
             $usuario->setNombre($data->nombre);
-            $usuario->setApellidos(""); //PENDIENTE QUITAR
             $usuario->setEmail($data->email);
             $usuario->setAccount($account);
             $em->persist($usuario);

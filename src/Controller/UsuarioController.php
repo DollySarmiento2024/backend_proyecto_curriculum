@@ -31,7 +31,6 @@ final class UsuarioController extends AbstractController
             $data[] = [
                 'id' => $usuario->getId(),
                 'nombre' => $usuario->getNombre(),
-                'apellidos' => $usuario->getApellidos(),
                 'email' => $usuario->getEmail(),
                 'telefono' => $usuario->getTelefono(),
                 'direccion' => $usuario->getDireccion(),
@@ -51,13 +50,12 @@ final class UsuarioController extends AbstractController
         $data = json_decode($request->getContent());
 
         //si datos vacios o no están los obligatorios, devolver mensaje de error
-        if (!$data || !isset($data->nombre, $data->apellidos, $data->email)){
+        if (!$data || !isset($data->nombre, $data->email)){
             return  new JsonResponse(['error' => 'No se pudo guardar el registro'], Response::HTTP_BAD_REQUEST);
         }
 
         $new_id = $this->usuarioRepository->new(
             nombre: $data->nombre,
-            apellidos: $data->apellidos ,
             email: $data->email,
             telefono: $data->telefono,
             direccion: $data->direccion,
@@ -70,7 +68,6 @@ final class UsuarioController extends AbstractController
             'status' => 'Usuario registrado correctamente',
             'usuario' => [
                 'nombre' => $data->nombre,
-                'apellidos' => $data->apellidos,
                 'email' => $data->email,
                 'telefono' => $data->telefono,
                 'direccion' => $data->direccion,
@@ -158,7 +155,6 @@ final class UsuarioController extends AbstractController
         $data = [
             'id' => $usuario->getId(),
             'nombre' => $usuario->getNombre(),
-            'apellidos' => $usuario->getApellidos(),
             'email' => $usuario->getEmail(),
             'telefono' => $usuario->getTelefono(),
             'direccion' => $usuario->getDireccion(),
@@ -197,9 +193,7 @@ final class UsuarioController extends AbstractController
         if (!empty($data->nombre)) {
             $usuario->setNombre($data->nombre);
         }
-        if (!empty($data->apellidos)) {
-            $usuario->setApellidos($data->apellidos);
-        }
+
         if (!empty($data->email)) {
             $usuario->setEmail($data->email);
         }
